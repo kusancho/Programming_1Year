@@ -7,8 +7,8 @@ Repository is for programming practice homework ( 1 semester )
 
 GitHub Actions |
 :---: |
-[![GitHub Actions](https://github.com/alexander-kurdakov/semprojecthm2020/workflows/Build%20master/badge.svg?branch=branchforrequest)](https://github.com/alexander-kurdakov/homework/actions?query=branch%3Amaster) |
-[![Build History](https://buildstats.info/github/chart/alexander-kurdakov/homework)](https://github.com/alexander-kurdakov/homework/actions?query=branch%3Amaster) |
+[![GitHub Actions](https://github.com/alexander-kurdakov/semprojecthm2020/workflows/Build%20master/badge.svg?branch=branchforrequest)](https://github.com/alexander-kurdakov/homework/actions?query=branch%3Abranchforrequest) |
+[![Build History](https://buildstats.info/github/chart/alexander-kurdakov/homework)](https://github.com/alexander-kurdakov/homework/actions?query=branch%3Abranchforrequest) |
 
 ## NuGet
 
