@@ -10,6 +10,8 @@ module Main =
         | Second_exercise
         | Third_exercise
         | Fourth_exercise
+        | Fifth_exercise
+        | Sixth_exercise
 
 
 
@@ -20,12 +22,14 @@ module Main =
                 | Second_exercise -> "start second exercise"
                 | Third_exercise -> "start third exercise"
                 | Fourth_exercise -> "start fourth exercise"
+                | Fifth_exercise -> "start fifth exercise"
+                | Sixth_exercise -> "start sixth exercise"
 
 
 
     [<EntryPoint>]
     let main (argv: string array) =
-        printf "dont enter too big numbers"
+        printfn "dont enter too big numbers"
         let parser = ArgumentParser.Create<CLIArguments>(programName = "homework")
 
         let results = parser.Parse(argv)
@@ -92,18 +96,38 @@ module Main =
             else
                 right<-b
                 left<-a
-
-
-
-
             homework.hw2.fourth_ex array left right
+        if results.Contains Fifth_exercise then
+            printf "enter two elements: "
+            let first=Console.ReadLine()|>int
+            let second=Console.ReadLine()|>int
+            let array=[|first;second|]
+            array.[0]<-array.[1]+array.[0]
+            array.[1]<-array.[0]-array.[1]
+            array.[0]<-array.[0]-array.[1]
+            printf "%A" array
 
+        if results.Contains Sixth_exercise then
+            printf "enter size of array: "
+            let size=Console.ReadLine()|>int
+            let array=homework.hw2.make_array size
+            printf "enter i and j indexes: "
+            let mutable i=Console.ReadLine()|>int
+            let mutable j=Console.ReadLine()|>int
+            if (i<0||j<0||j>size-1||i>size-1) then
+                let mutable flag=true
+                while flag do
+                    printfn "you entered wrong indexes! try again:"
+                    i<-Console.ReadLine()|>int
+                    j<-Console.ReadLine()|>int
+                    if (i<0||j<0||j>size-1||i>size-1) then
+                        flag<-true
+                    else flag<-false
 
-
-
-
-
-
+            else
+                array.[i]<-array.[j]+array.[i]
+                array.[j]<-array.[i]-array.[j]
+                array.[i]<-array.[i]-array.[j]
 
         else
             parser.PrintUsage() |> printfn "%s"

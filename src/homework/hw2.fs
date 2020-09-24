@@ -1,4 +1,5 @@
 namespace homework
+open System
 module hw2 =
 
     let first_ex x =  x*x*x*x + x*x*x + x*x + x + (1)|>int
@@ -31,7 +32,7 @@ module hw2 =
 
             if array.[i]<=max then
                 printf "%A " i
-                temp_array.[j]<-array.[i]
+                temp_array.[j]<-i
                 j<-j+1
         let out_array=Array.zeroCreate j
         for l=0 to j-1 do
@@ -51,12 +52,30 @@ module hw2 =
 
             if array.[i]<left || array.[i]>right then
                 printf "%A " i
-                temp_array.[j]<-array.[i]
+                temp_array.[j]<-i
                 j<-j+1
         let out_array=Array.zeroCreate j
         for l=0 to j-1 do
             out_array.[l]<-temp_array.[l]
         out_array
+    let fifth_ex_test (array:int array)  =
+
+            array.[0]<-array.[1]+array.[0]
+            array.[1]<-array.[0]-array.[1]
+            array.[0]<-array.[0]-array.[1]
+            array
+    let sixth_ex_test (array:int array) i j=
+
+
+
+
+
+
+
+                array.[i]<-array.[j]+array.[i]
+                array.[j]<-array.[i]-array.[j]
+                array.[i]<-array.[i]-array.[j]
+                array
 
 
 

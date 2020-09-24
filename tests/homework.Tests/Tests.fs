@@ -20,5 +20,12 @@ let tests =
           testCase "ordinary test, #4" <| fun _ ->
             let test = homework.hw2.fourth_ex_test [|1;4;5;7;8;5;80;59;36|] 20 100
             Expect.equal test [|0;1;2;3;4;5|] "there must be [|0;1;2;3;4;5|]"
-            ]
+
+          testCase "ordinary test, #5" <| fun _ ->
+              let test=homework.hw2.fifth_ex_test [|2;1|]
+              Expect.equal test [|1;2|] "there must be [|1;2|]"
+          testCase "ordinary test, #6" <| fun _ ->
+              let test= homework.hw2.sixth_ex_test [|3;5;2|] 0 2
+              Expect.equal test [|2;5;3|] "there must be [|2;5;3|]"
+        ]
 
