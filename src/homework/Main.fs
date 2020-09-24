@@ -1,88 +1,110 @@
 namespace homework
-
-open System.Reflection
-
-module AssemblyInfo =
-
-    let metaDataValue (mda: AssemblyMetadataAttribute) = mda.Value
-
-    let getMetaDataAttribute (assembly: Assembly) key =
-        assembly.GetCustomAttributes(typedefof<AssemblyMetadataAttribute>)
-        |> Seq.cast<AssemblyMetadataAttribute>
-        |> Seq.find (fun x -> x.Key = key)
-
-    let getReleaseDate assembly =
-        "ReleaseDate"
-        |> getMetaDataAttribute assembly
-        |> metaDataValue
-
-    let getGitHash assembly =
-        "GitHash"
-        |> getMetaDataAttribute assembly
-        |> metaDataValue
-
-    let getVersion assembly =
-        "AssemblyVersion"
-        |> getMetaDataAttribute assembly
-        |> metaDataValue
-
-    let assembly = lazy (Assembly.GetEntryAssembly())
-
-    let printVersion() =
-        let version = assembly.Force().GetName().Version
-        printfn "%A" version
-
-    let printInfo() =
-        let assembly = assembly.Force()
-        let name = assembly.GetName()
-        let version = assembly.GetName().Version
-        let releaseDate = getReleaseDate assembly
-        let githash = getGitHash assembly
-        printfn "%s - %A - %s - %s" name.Name version releaseDate githash
-
-module Say =
-    open System
-
-    let nothing name = name |> ignore
-
-    let hello name = sprintf "Hello %s" name
-
-    let colorizeIn color str =
-        let oldColor = Console.ForegroundColor
-        Console.ForegroundColor <- (Enum.Parse(typedefof<ConsoleColor>, color) :?> ConsoleColor)
-        printfn "%s" str
-        Console.ForegroundColor <- oldColor
-
+// ПРЕДПОЛАГАЕТСЯ, ЧТО ПОЛЬЗОВАТЕЛЬ НЕ БУДЕТ ВВОДИТЬ СЛИШКОМ БОЛЬШИХ ЧИСЕЛ
 module Main =
     open Argu
+    open System
+
 
     type CLIArguments =
-        | Info
-        | Version
-        | Favorite_Color of string // Look in App.config
-        | [<MainCommand>] Hello of string
+        | First_exercise
+        | Second_exercise
+        | Third_exercise
+        | Fourth_exercise
+
+
+
         interface IArgParserTemplate with
             member s.Usage =
                 match s with
-                | Info -> "More detailed information"
-                | Version -> "Version of application"
-                | Favorite_Color _ -> "Favorite color"
-                | Hello _ -> "Who to say hello to"
+                | First_exercise -> "start first exercise"
+                | Second_exercise -> "start second exercise"
+                | Third_exercise -> "start third exercise"
+                | Fourth_exercise -> "start fourth exercise"
+
+
 
     [<EntryPoint>]
     let main (argv: string array) =
+        printf "dont enter too big numbers"
         let parser = ArgumentParser.Create<CLIArguments>(programName = "homework")
+
         let results = parser.Parse(argv)
-        if results.Contains Version then
-            AssemblyInfo.printVersion()
-        elif results.Contains Info then
-            AssemblyInfo.printInfo()
-        elif results.Contains Hello then
-            match results.TryGetResult Hello with
-            | Some v ->
-                let color = results.GetResult Favorite_Color
-                Say.hello v |> Say.colorizeIn color
-            | None -> parser.PrintUsage() |> printfn "%s"
+        if results.Contains First_exercise then
+            printf "enter the number: "
+            let number = Console.ReadLine() |> int
+            let current = homework.hw2.first_ex number
+            printfn "the result of doing fist ex. = %A" current
+        if results.Contains Second_exercise then
+            printf "enter the number: "
+            let number = Console.ReadLine() |> int
+            let current = homework.hw2.second_ex number
+            printfn "the result of doing second ex. = %A" current
+        if results.Contains Third_exercise then
+            printf "enter the size of array: "
+            let mutable size = Console.ReadLine()|>int
+            if size<1 then
+               let mutable flag=true
+               while flag do
+                    printf "you entered wrong size, try again :)"
+                    size <- Console.ReadLine() |> int
+                    if size>1 then
+                        flag<-false
+                    else flag<-true
+            printf "enter max elem: "
+            let max = Console.ReadLine()|>int
+            let array=homework.hw2.make_array size
+            homework.hw2.third_ex array size max
+        if results.Contains Fourth_exercise then
+            printf "enter the size of array: "
+            let mutable size = Console.ReadLine()|>int
+            if size<1 then
+               let mutable flag=true
+               while flag do
+                    printf "you entered wrong size, try again :) "
+                    size <- Console.ReadLine() |> int
+                    if size>1 then
+                        flag<-false
+                    else flag<-true
+            let array=homework.hw2.make_array size
+            printf"enter range (from): "     // для удобства лучше будет упорядочить(пусть точка - не диапазон)
+            let mutable a =Console.ReadLine()|>int
+            printf"enter range (to): "
+            let mutable b = Console.ReadLine()|>int
+            let mutable right=0
+            let mutable left=0
+
+            if a=b then
+
+                let mutable flag=true
+                while flag do
+                    printf "incorrect input!!!"
+
+                    a<-Console.ReadLine()|>int
+                    b<-Console.ReadLine()|>int
+                    if not (a=b)then
+                        flag<-false
+
+            elif a>b then
+                right<-a
+                left<-b
+
+
+            else
+                right<-b
+                left<-a
+
+
+
+
+            homework.hw2.fourth_ex array left right
+
+
+
+
+
+
+
+
         else
             parser.PrintUsage() |> printfn "%s"
         0
