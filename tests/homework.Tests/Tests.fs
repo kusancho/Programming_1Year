@@ -8,7 +8,7 @@ let tests =
     testList "samples"
         [
           testCase "test for the sake of test #1" <| fun _ ->
-            let test=homework.hw2.firstEx  0
+            let test=homework.hw2.firstEx 0
             Expect.equal test 1 "there must be 1"
 
           testCase "test for the sake of test num.2, #1" <| fun _ ->
