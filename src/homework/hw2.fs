@@ -7,30 +7,33 @@ module hw2 =
        let res = (sqrX * (sqrX + x + 1) + x + 1) |> int
        res
     let makeArray size = // make random array
+        if size < 1
+        then failwith("wrong size of array (makeArray)")
         let random_array amount =
             let rand = System.Random()
             Array.init amount (fun _ -> rand.Next ())
         let myArray = random_array size
         myArray
-    let thirdEx ( array: int array ) size max = // function specially for test, because of returning obj
-        printf "indexes of elements which are less than entered number:"
+    let thirdEx (array: int array) max =
         let mutable j = 0
-        let tempArray = Array.zeroCreate size
-        for i = 0 to size - 1 do
+        let tempArray = Array.zeroCreate array.Length
+        for i = 0 to array.Length - 1 do
             if array.[i] <= max
             then
                 tempArray.[j] <- i
                 j <- j + 1
-        let outArray = Array.zeroCreate j
-        for l = 0 to j - 1 do
-            outArray.[l] <- tempArray.[l]
-        outArray
-    let fourthEx ( array: int array ) a b =
-        let mutable flag = true
+        if j = 0
+        then failwith("indexes doesn't exist")
+        else
+            let outArray = Array.zeroCreate j
+            for l = 0 to j - 1 do
+                outArray.[l] <- tempArray.[l]
+            outArray
+    let fourthEx (array: int array) a b =
         let mutable right = 0
         let mutable left = 0
         if a = b
-        then flag <- false
+        then failwith("point isn't open range")
         elif a > b
         then
                 right <- a
@@ -40,7 +43,7 @@ module hw2 =
                 left <- a
         let mutable j = 0
         if array.Length < 1
-        then flag <- false
+        then failwith("wrong size of array")
         let tempArray = Array.zeroCreate array.Length
         for i = 0 to array.Length - 1 do
             if array.[i] < left || array.[i] > right
@@ -48,15 +51,11 @@ module hw2 =
                 tempArray.[j] <- i
                 j <- j + 1
         if j = 0
-        then flag <- false
+        then failwith("indexes doesn't exist")
         let outArray = Array.zeroCreate j
         for l = 0 to j - 1 do
             outArray.[l] <- tempArray.[l]
-        if flag
-        then outArray
-        else
-            let errorOut = [|6;6;6|]
-            errorOut
+        outArray
     let fifthEx first second =
         let array = [|first;second|]
         array.[0] <- array.[1] + array.[0]
@@ -65,9 +64,7 @@ module hw2 =
         array
     let sixthEx (array: int array) i j =
             if (i < 0 || j < 0 || j > array.Length - 1 || i > array.Length - 1)
-            then
-                let errorArray = Array.zeroCreate (array.Length + 1)
-                errorArray
+            then failwith("wrong indexes")
             else
                 array.[i] <- array.[j] + array.[i]
                 array.[j] <- array.[i] - array.[j]

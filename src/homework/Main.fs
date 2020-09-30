@@ -45,41 +45,27 @@ module Main =
         then
             printf "enter the size of array: "
             let size = Console.ReadLine() |> int
+            if size < 1
+            then failwith("wrong size")
             printf "enter max elem: "
             let max = Console.ReadLine() |> int
             let array = homework.hw2.makeArray  size
-            let out = homework.hw2.thirdEx  array size max
-            if out.Length = 0
-            then printf "doesn't exist "
-            else
-                for i = 0 to size - 1 do
-                    printf "%A " out.[i]
+            let out = homework.hw2.thirdEx  array max
+            printf " the result of doing ex: "
+            printf "%A" out
 
         if results.Contains FourthExercise
         then
             printf "enter the size of array: "
             let mutable size = Console.ReadLine() |> int
-            if size < 1
-            then
-               let mutable flag = true
-               while flag do
-                    printf "you entered wrong size, try again :) "
-                    size <- Console.ReadLine() |> int
-                    if size > 1
-                    then flag <- false
-                    else flag <- true
             let array = homework.hw2.makeArray size
-            printf "enter range (from): "     // для удобства лучше будет упорядочить(пусть точка - не диапазон)
+            printf "enter range (from): "
             let mutable a = Console.ReadLine() |> int
             printf "enter range (to): "
             let mutable b = Console.ReadLine() |> int
             let out = homework.hw2.fourthEx  array a b
             printf " the result of doing ex: "
-            if out = [|6;6;6|]
-            then printf "wrong input (size) indexes doesn't exist"
-            else
-                for i = 0 to out.Length - 1 do
-                    printf "%A" out.[i]
+            printf "%A" out
 
         if results.Contains FifthExercise
         then
@@ -87,6 +73,7 @@ module Main =
             let first = Console.ReadLine() |> int
             let second = Console.ReadLine() |> int
             let array = homework.hw2.fifthEx first second
+            printf " the result of doing ex: "
             printf "%A" array
 
         if results.Contains SixthExercise
@@ -98,9 +85,8 @@ module Main =
             let mutable i = Console.ReadLine() |> int
             let mutable j = Console.ReadLine() |> int
             let out = homework.hw2.sixthEx array i j
-            if size < out.Length
-            then printf "wrong indexes"
-            else printf "%A" out
+            printf " the result of doing ex: "
+            printf "%A" out
 
         else
             parser.PrintUsage() |> printfn "%s"
