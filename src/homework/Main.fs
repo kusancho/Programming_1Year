@@ -45,8 +45,6 @@ module Main =
         then
             printf "enter the size of array: "
             let size = Console.ReadLine() |> int
-            if size < 1
-            then failwith("wrong size")
             printf "enter max elem: "
             let max = Console.ReadLine() |> int
             let array = homework.hw2.makeArray  size
