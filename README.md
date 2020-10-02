@@ -1,5 +1,8 @@
 Repository is for programming practice homework ( 1 semester )
 
+--номерзадания-exercise
+
+--help (помощь))
 
 ## Builds
 
@@ -14,3 +17,4 @@ GitHub Actions |
 Package | Stable | Prerelease
 --- | --- | ---
 homework | [![NuGet Badge](https://buildstats.info/nuget/semprojecthm2020)](https://www.nuget.org/packages/semprojecthm2020/) | [![NuGet Badge](https://buildstats.info/nuget/semprojecthm2020?includePreReleases=true)](https://www.nuget.org/packages/semprojecthm2020/)
+
