@@ -6,11 +6,15 @@
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
+        <Compile Include="TestsForThirdHW.fs" />
         <Compile Include="Tests.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../../src/homework/homework.fsproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />
     </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
