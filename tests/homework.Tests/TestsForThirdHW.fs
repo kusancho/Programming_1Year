@@ -96,12 +96,8 @@ let tests =
             Expect.throws (fun _ -> homework.hw3.sixthExercise -3 |> ignore) "exception works"
 
         testProperty "is equal  naive to optimized?" <| fun (n:int) ->
-            if abs n > 30
-            then
-                let temp = n % 10
-                Expect.equal (homework.hw3.fifthExercise (abs temp)) (homework.hw3.fourthExercise (abs temp)) "fib naive not equal to optimized"
-            else
-                Expect.equal (homework.hw3.fifthExercise (abs n)) (homework.hw3.fourthExercise (abs n)) "fib naive not equal to optimized"
+            let alt = abs <| if abs n > 30 then n % 10 else n
+            Expect.equal (homework.hw3.fifthExercise (alt)) (homework.hw3.fourthExercise (alt)) "fib naive not equal to optimized"
     ]
 
 

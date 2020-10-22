@@ -29,17 +29,23 @@ module matrixes =
 
     let rec powMatrixnaively (m1: array<array<int>>) pow =
         if not (m1.Length = m1.[0].Length) then failwith("matrix should be M*M ")
-        if pow < 0 then failwith("i cant pow in numbers < 0 ")
-        else if pow = 0 then identityMatrix m1.Length
-        else if pow = 1 then m1
+        if pow < 0
+        then failwith("i cant pow in numbers < 0 ")
+        elif pow = 0
+        then identityMatrix m1.Length
+        elif pow = 1
+        then m1
         else powMatrixnaively (multiplyMartix m1 matrixForFib) (pow - 1)
 
     let rec optimizedPow (m1: array<array<int>>) pow =
         if not (m1.Length = m1.[0].Length) then failwith("matrix should be M*M")
-        if pow < 0 then failwith("i cant pow in numbers < 0 ")
-        else if pow = 0 then identityMatrix m1.Length
-        else if pow = 1 then m1
-        else if pow % 2 = 0
+        if pow < 0
+        then failwith("i cant pow in numbers < 0 ")
+        elif pow = 0
+        then identityMatrix m1.Length
+        elif pow = 1
+        then m1
+        elif pow % 2 = 0
         then
             multiplyMartix (optimizedPow m1 (pow / 2) ) (optimizedPow m1 (pow / 2) )
         else
