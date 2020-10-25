@@ -42,7 +42,7 @@ module hw3 =
         then n
         else
             let m1 = homework.matrixes.matrixForFib
-            let out = homework.matrixes.powMatrixnaively m1 (n - 1)
+            let out = homework.matrixes.powMatrixNaively m1 (n - 1)
             let result = out.[0].[0]
             result
 
@@ -59,7 +59,7 @@ module hw3 =
        if n < 0
        then failwith("wrong number")
        else
-           let array = Array.zeroCreate (n+1)
+           let array = Array.zeroCreate (n + 1)
            array.[1] <- 1
            for i = 2 to n do
                array.[i] <- array.[i - 1] + array.[i - 2]

@@ -15,11 +15,12 @@ module matrixes =
                 if i = j then out.[i].[j] <- 1
         out
 
-    let multiplyMartix (m1: array<array<_>>) (m2: array<array<_>>) =    // ( m, n ) * ( n , k ) = ( m, k )
-        if not (m1.[0].Length = m2.[0].Length) then failwith (" ( m, n ) * ( n , k ) = ( m, k ) ")
+    let multiplyMartix (m1: array<array<_>>) (m2: array<array<_>>) = // ( m, n ) * ( n , k ) = ( m, k )
         let m = m1.Length
         let n = m1.[0].Length
+        let linesM2 = m2.Length
         let k = m2.[0].Length
+        if not (n = linesM2) then failwith (" ( m, n ) * ( n , k ) = ( m, k ) ")
         let res = Array.init m (fun _ -> Array.zeroCreate k)
         for i = 0 to m - 1 do
             for j = 0 to k - 1 do
@@ -27,7 +28,7 @@ module matrixes =
                     res.[i].[j] <- res.[i].[j] + m1.[i].[l] * m2.[l].[j]
         res
 
-    let rec powMatrixnaively (m1: array<array<int>>) pow =
+    let rec powMatrixNaively (m1: array<array<int>>) pow =
         if not (m1.Length = m1.[0].Length) then failwith("matrix should be M*M ")
         if pow < 0
         then failwith("i cant pow in numbers < 0 ")
@@ -35,7 +36,7 @@ module matrixes =
         then identityMatrix m1.Length
         elif pow = 1
         then m1
-        else powMatrixnaively (multiplyMartix m1 matrixForFib) (pow - 1)
+        else powMatrixNaively (multiplyMartix m1 matrixForFib) (pow - 1)
 
     let rec optimizedPow (m1: array<array<int>>) pow =
         if not (m1.Length = m1.[0].Length) then failwith("matrix should be M*M")
@@ -47,8 +48,8 @@ module matrixes =
         then m1
         elif pow % 2 = 0
         then
-            multiplyMartix (optimizedPow m1 (pow / 2) ) (optimizedPow m1 (pow / 2) )
+            let even = optimizedPow m1 (pow / 2)
+            multiplyMartix even even
         else
-            multiplyMartix m1 (multiplyMartix
-                                             (optimizedPow m1  ((pow - 1) / 2))
-                                             (optimizedPow m1  ((pow - 1) / 2)))
+            let odd = optimizedPow m1 ((pow - 1) / 2)
+            multiplyMartix m1 (multiplyMartix odd odd)

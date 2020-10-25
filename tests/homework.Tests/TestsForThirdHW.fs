@@ -18,7 +18,7 @@ let tests =
                                         (homework.matrixes.identityMatrix 9) |> ignore) "Exception works"
 
         testCase "test pow matrix naively" <| fun _ ->
-            Expect.throws (fun _ -> homework.matrixes.powMatrixnaively
+            Expect.throws (fun _ -> homework.matrixes.powMatrixNaively
                                         (homework.matrixes.matrixForFib) -1 |> ignore) "Exception works"
 
         testCase "test optimized pow matrix" <| fun _ ->
@@ -94,12 +94,37 @@ let tests =
 
         testCase "throw test for sixth exercise" <| fun _ ->
             Expect.throws (fun _ -> homework.hw3.sixthExercise -3 |> ignore) "exception works"
-
-        testProperty "is equal  naive to optimized?" <| fun (n:int) ->
-            let alt = abs <| if abs n > 30 then n % 10 else n
-            Expect.equal (homework.hw3.fifthExercise (alt)) (homework.hw3.fourthExercise (alt)) "fib naive not equal to optimized"
     ]
 
+[<Tests>]
+
+let FibAutoTests =
+    testList "testProperty for Fib exercises" [
+
+        testProperty "is equal  naive to optimized?" <| fun (n:int) ->
+            let n' = abs <| if abs n > 30 then n % 10 else n
+            Expect.equal (homework.hw3.fifthExercise n') (homework.hw3.fourthExercise n') "fib naive not equal to optimized"
+
+        testProperty "is equal  rec to optimized?" <| fun (n:int) ->
+            let n' = abs <| if abs n > 30 then n % 10 else n
+            Expect.equal (homework.hw3.fibRec n') (homework.hw3.fifthExercise n') "fib optimized not equal to rec"
+
+        testProperty "is equal  iter to optimized?" <| fun (n:int) ->
+            let n' = abs <| if abs n > 30 then n % 10 else n
+            Expect.equal (homework.hw3.fibIter n') (homework.hw3.fifthExercise n') "fib optimized not equal to iter"
+
+        testProperty "is equal  iter to rec?" <| fun (n:int) ->
+            let n' = abs <| if abs n > 30 then n % 10 else n
+            Expect.equal (homework.hw3.fibIter n') (homework.hw3.fibRec n') "fib iter not equal to rec"
+
+        testProperty "is equal  tail to rec?" <| fun (n:int) ->
+            let n' = abs <| if abs n > 30 then n % 10 else n
+            Expect.equal (homework.hw3.fibTail n') (homework.hw3.fibRec n') "fib tail not equal to rec"
+
+        testProperty "is equal  tail to naive?" <| fun (n:int) ->
+            let n' = abs <| if abs n > 30 then n % 10 else n
+            Expect.equal (homework.hw3.fibTail n') (homework.hw3.fourthExercise n') "fib naive not equal to tail"
+    ]
 
 
 
