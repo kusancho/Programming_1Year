@@ -34,9 +34,7 @@ module matrixes =
         then failwith("i cant pow in numbers < 0 ")
         elif pow = 0
         then identityMatrix m1.Length
-        elif pow = 1
-        then m1
-        else powMatrixNaively (multiplyMartix m1 matrixForFib) (pow - 1)
+        else multiplyMartix m1 (powMatrixNaively m1 (pow - 1))
 
     let rec optimizedPow (m1: array<array<int>>) pow =
         if not (m1.Length = m1.[0].Length) then failwith("matrix should be M*M")
@@ -44,8 +42,6 @@ module matrixes =
         then failwith("i cant pow in numbers < 0 ")
         elif pow = 0
         then identityMatrix m1.Length
-        elif pow = 1
-        then m1
         elif pow % 2 = 0
         then
             let even = optimizedPow m1 (pow / 2)
