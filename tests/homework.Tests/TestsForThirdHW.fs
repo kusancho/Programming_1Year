@@ -4,10 +4,10 @@ open Expecto
 open homework.hw3
 open Microsoft.VisualStudio.TestPlatform.ObjectModel
 
-let testEqual func_name (testValue: int) (expectedValue: int) (errorMsg: string) (description: string) =
+let testEqual func_name (testValue: int) (expectedValue: int) (description: string) =
     testCase description <| fun _ ->
         let test = func_name testValue
-        Expect.equal test expectedValue errorMsg
+        Expect.equal test expectedValue (sprintf "there must be: %A" expectedValue)
 
 [<Tests>]
 let tests =
@@ -36,60 +36,43 @@ let tests =
             Expect.sequenceEqual (homework.matrixes.optimizedPow homework.matrixes.matrixForFib 0)
                                  (homework.matrixes.identityMatrix 2) "expected [|[|1;1|],[|1;0|]|]"
 
-        testCase "default test for rec №1" <| fun _ ->
-            let test = homework.hw3.fibRec 0
-            Expect.equal test 0 "there must be 0"
+        testEqual firstExercise 0 0 "test for rec #1"
 
-        testCase "default test for rec №2" <| fun _ ->
-            let test = homework.hw3.fibRec 2
-            Expect.equal test 1 "there must be 1"
+        testEqual firstExercise 2 1 "test for rec #2"
+
+        testEqual secondExercise 1 1 "test for iter #1"
+
+        testEqual secondExercise 3 2 "test for iter #2"
+
+        testEqual thirdExercise 4 3 "test for tail #1"
+
+        testEqual thirdExercise 5 5 "test for tail #2"
+
+        testEqual thirdExercise 0 0 "test for naive #1"
+
+        testEqual thirdExercise 6 8 "test for naive #2"
+
+        testEqual thirdExercise 8 21 "test for optimized #1"
+
+        testEqual thirdExercise 7 13 "test for optimized #2"
 
         testCase "throw test for rec" <| fun _ ->
-            Expect.throws (fun _ -> homework.hw3.fibRec -1 |> ignore) "exception works"
-
-        testCase "default test for iter №1" <| fun _ ->
-            let test = homework.hw3.fibIter 1
-            Expect.equal test 1 "there must be 1"
-
-        testCase "default test for iter №2" <| fun _ ->
-            let test = homework.hw3.fibIter 3
-            Expect.equal test 2 "there must be 2"
+            Expect.throws (fun _ -> homework.hw3.firstExercise -1 |> ignore) "exception works"
 
         testCase "throw test for iter" <| fun _ ->
-            Expect.throws (fun _ -> homework.hw3.fibIter -1 |> ignore) "exception works"
-
-        testCase "default test for tail №1" <| fun _ ->
-            let test = homework.hw3.fibTail 4
-            Expect.equal test 3 "there must be 3"
-
-        testCase "default test for tail №2" <| fun _ ->
-            let test = homework.hw3.fibTail 5
-            Expect.equal test 5 "there must be 5"
+            Expect.throws (fun _ -> homework.hw3.secondExercise -1 |> ignore) "exception works"
 
         testCase "throw test for tail" <| fun _ ->
-            Expect.throws (fun _ -> homework.hw3.fibTail -1 |> ignore) "exception works"
-
-        testCase "default test for naive №1" <| fun _ ->
-            let test = homework.hw3.fourthExercise 0
-            Expect.equal test 0 "there must be 0"
-
-        testCase "default test for naive №2" <| fun _ ->
-            let test = homework.hw3.fourthExercise 6
-            Expect.equal test 8 "there must be 8"
+            Expect.throws (fun _ -> homework.hw3.thirdExercise -1 |> ignore) "exception works"
 
         testCase "throw test for naive" <| fun _ ->
             Expect.throws (fun _ -> homework.hw3.fourthExercise -1 |> ignore) "exception works"
 
-        testCase "default test for optimized №1" <| fun _ ->
-            let test = homework.hw3.fifthExercise 8
-            Expect.equal test 21 "there must be 21"
-
-        testCase "default test for optimized №2" <| fun _ ->
-            let test = homework.hw3.fifthExercise 7
-            Expect.equal test 13 "there must be 13"
-
         testCase "throw test for optimized" <| fun _ ->
             Expect.throws (fun _ -> homework.hw3.fifthExercise -6 |> ignore) "exception works"
+
+        testCase "throw test for sixth exercise" <| fun _ ->
+            Expect.throws (fun _ -> homework.hw3.sixthExercise -3 |> ignore) "exception works"
 
         testCase "default test for sixth №1" <| fun _ ->
             let test = homework.hw3.sixthExercise 3
@@ -98,39 +81,30 @@ let tests =
         testCase "default test for sixth №2" <| fun _ ->
             let test = homework.hw3.sixthExercise 5
             Expect.sequenceEqual test [|0;1;1;2;3;5|] "there must be [|0;1;1;2;3;5|]"
-
-        testCase "throw test for sixth exercise" <| fun _ ->
-            Expect.throws (fun _ -> homework.hw3.sixthExercise -3 |> ignore) "exception works"
     ]
+
+let property firstFunc secondFunc (firstMsg: string) (secondMsg: string) =
+    testProperty (sprintf "is %A to %A?" firstMsg secondMsg) <| fun (n:int) ->
+        let n' = abs <| if abs n > 30 then n % 10 else n
+        Expect.equal (firstFunc n') (secondFunc n') (sprintf "%A not equal to %A" firstMsg secondMsg)
 
 [<Tests>]
 
 let FibAutoTests =
     testList "testProperty for Fib exercises" [
 
-        testProperty "is equal  naive to optimized?" <| fun (n:int) ->
-            let n' = abs <| if abs n > 30 then n % 10 else n
-            Expect.equal (homework.hw3.fifthExercise n') (homework.hw3.fourthExercise n') "fib naive not equal to optimized"
+        property fourthExercise fifthExercise "naive" "optimized"
 
-        testProperty "is equal  rec to optimized?" <| fun (n:int) ->
-            let n' = abs <| if abs n > 30 then n % 10 else n
-            Expect.equal (homework.hw3.fibRec n') (homework.hw3.fifthExercise n') "fib optimized not equal to rec"
+        property firstExercise fifthExercise "recursive" "optimized"
 
-        testProperty "is equal  iter to optimized?" <| fun (n:int) ->
-            let n' = abs <| if abs n > 30 then n % 10 else n
-            Expect.equal (homework.hw3.fibIter n') (homework.hw3.fifthExercise n') "fib optimized not equal to iter"
+        property secondExercise fifthExercise "iter" "optimized"
 
-        testProperty "is equal  iter to rec?" <| fun (n:int) ->
-            let n' = abs <| if abs n > 30 then n % 10 else n
-            Expect.equal (homework.hw3.fibIter n') (homework.hw3.fibRec n') "fib iter not equal to rec"
+        property firstExercise secondExercise "recursive" "iter"
 
-        testProperty "is equal  tail to rec?" <| fun (n:int) ->
-            let n' = abs <| if abs n > 30 then n % 10 else n
-            Expect.equal (homework.hw3.fibTail n') (homework.hw3.fibRec n') "fib tail not equal to rec"
+        property firstExercise thirdExercise "recursive" "tail"
 
-        testProperty "is equal  tail to naive?" <| fun (n:int) ->
-            let n' = abs <| if abs n > 30 then n % 10 else n
-            Expect.equal (homework.hw3.fibTail n') (homework.hw3.fourthExercise n') "fib naive not equal to tail"
+        property thirdExercise fourthExercise "tail" "naive"
+
     ]
 
 

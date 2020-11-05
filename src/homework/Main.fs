@@ -39,19 +39,17 @@ module Main =
         let parser = ArgumentParser.Create<CLIArguments>(programName = "homework")
         let results = parser.Parse(argv)
 
-        if results.Contains FirstExercise1
-        then
+        let copyPaste exercise =
             printf "enter the number: "
             let number = Console.ReadLine() |> int
-            let current = homework.hw2.firstEx  number
+            let current = exercise number
             printfn "the result of doing fist ex. = %A" current
 
+        if results.Contains FirstExercise1
+        then copyPaste hw2.firstEx
+
         if results.Contains SecondExercise1
-        then
-            printf "enter the number: "
-            let number = Console.ReadLine() |> int
-            let current = homework.hw2.secondEx  number
-            printfn "the result of doing second ex. = %A" current
+        then copyPaste hw2.secondEx
 
         if results.Contains ThirdExercise1
         then
@@ -59,8 +57,8 @@ module Main =
             let size = Console.ReadLine() |> int
             printf "enter max elem: "
             let max = Console.ReadLine() |> int
-            let array = homework.hw2.makeArray  size
-            let out = homework.hw2.thirdEx  array max
+            let array = hw2.makeArray  size
+            let out = hw2.thirdEx  array max
             printf " the result of doing ex: "
             printf "%A" out
 
@@ -68,12 +66,12 @@ module Main =
         then
             printf "enter the size of array: "
             let mutable size = Console.ReadLine() |> int
-            let array = homework.hw2.makeArray size
+            let array = hw2.makeArray size
             printf "enter range (from): "
             let mutable a = Console.ReadLine() |> int
             printf "enter range (to): "
             let mutable b = Console.ReadLine() |> int
-            let out = homework.hw2.fourthEx  array a b
+            let out = hw2.fourthEx  array a b
             printf " the result of doing ex: "
             printf "%A" out
 
@@ -82,7 +80,7 @@ module Main =
             printf "enter two elements: "
             let first = Console.ReadLine() |> int
             let second = Console.ReadLine() |> int
-            let array = homework.hw2.fifthEx first second
+            let array = hw2.fifthEx first second
             printf " the result of doing ex: "
             printf "%A" array
 
@@ -90,55 +88,31 @@ module Main =
         then
             printf "enter size of array: "
             let size = Console.ReadLine() |> int
-            let array = homework.hw2.makeArray size
+            let array = hw2.makeArray size
             printf "enter i and j indexes: "
             let mutable i = Console.ReadLine() |> int
             let mutable j = Console.ReadLine() |> int
-            let out = homework.hw2.sixthEx array i j
+            let out = hw2.sixthEx array i j
             printf " the result of doing ex: "
             printf "%A" out
 
         if results.Contains FirstExercise2
-        then
-            printf "enter number of fib. number: "
-            let n = Console.ReadLine() |> int
-            let out = homework.hw3.fibRec n
-            printf "the result of doing ex: %A" out
+        then copyPaste hw3.firstExercise
 
         if results.Contains SecondExercise2
-        then
-            printf "enter number of fib. number: "
-            let n = Console.ReadLine() |> int
-            let out = homework.hw3.fibIter n
-            printf "the result of doing ex: %A" out
+        then copyPaste hw3.secondExercise
 
         if results.Contains ThirdExercise2
-        then
-            printf "enter number of fib. number: "
-            let n = Console.ReadLine() |> int
-            let out = homework.hw3.fibTail n
-            printf "the result of doing ex: %A" out
+        then copyPaste hw3.thirdExercise
 
         if results.Contains FourthExercise2
-        then
-            printf "enter number of fib. number: "
-            let n = Console.ReadLine() |> int
-            let out = homework.hw3.fourthExercise n
-            printf "the result of doing ex: %A" out
+        then copyPaste hw3.fourthExercise
 
         if results.Contains FifthExercise2
-        then
-            printf "enter number of fib. number: "
-            let n = Console.ReadLine() |> int
-            let out = homework.hw3.fifthExercise n
-            printfn "the result of doing ex: %A" out
+        then copyPaste hw3.fifthExercise
 
         if results.Contains SixthExercise2
-        then
-            printf "enter number of fib. number: "
-            let n = Console.ReadLine() |> int
-            let out = homework.hw3.sixthExercise n
-            printfn "the result of doing ex: %A" out
+        then copyPaste hw3.sixthExercise
 
         else
             parser.PrintUsage() |> printfn "%s"
