@@ -1,7 +1,14 @@
 module TestsForThirdHW
 
 open Expecto
+open homework.hw3
 open Microsoft.VisualStudio.TestPlatform.ObjectModel
+
+let testEqual func_name (testValue: int) (expectedValue: int) (errorMsg: string) (description: string) =
+    testCase description <| fun _ ->
+        let test = func_name testValue
+        Expect.equal test expectedValue errorMsg
+
 [<Tests>]
 let tests =
     testList "Tests for third homework" [
