@@ -35,21 +35,20 @@ module Main =
 
     [<EntryPoint>]
     let main (argv: string array) =
-        printfn "dont enter too big numbers"
         let parser = ArgumentParser.Create<CLIArguments>(programName = "homework")
         let results = parser.Parse(argv)
 
-        let copyPaste exercise =
+        let noFlood exercise =
             printf "enter the number: "
             let number = Console.ReadLine() |> int
-            let current = exercise number
-            printfn "the result of doing fist ex. = %A" current
+            let current = exercise  number
+            printfn "the result of doing  ex. = %A" current
 
         if results.Contains FirstExercise1
-        then copyPaste hw2.firstEx
+        then noFlood hw2.firstEx
 
         if results.Contains SecondExercise1
-        then copyPaste hw2.secondEx
+        then noFlood hw2.secondEx
 
         if results.Contains ThirdExercise1
         then
@@ -97,22 +96,22 @@ module Main =
             printf "%A" out
 
         if results.Contains FirstExercise2
-        then copyPaste hw3.firstExercise
+        then noFlood hw3.firstExercise
 
         if results.Contains SecondExercise2
-        then copyPaste hw3.secondExercise
+        then noFlood hw3.secondExercise
 
         if results.Contains ThirdExercise2
-        then copyPaste hw3.thirdExercise
+        then noFlood hw3.thirdExercise
 
         if results.Contains FourthExercise2
-        then copyPaste hw3.fourthExercise
+        then noFlood hw3.fourthExercise
 
         if results.Contains FifthExercise2
-        then copyPaste hw3.fifthExercise
+        then noFlood hw3.fifthExercise
 
         if results.Contains SixthExercise2
-        then copyPaste hw3.sixthExercise
+        then noFlood hw3.sixthExercise
 
         else
             parser.PrintUsage() |> printfn "%s"

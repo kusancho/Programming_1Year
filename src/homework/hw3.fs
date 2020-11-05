@@ -1,7 +1,7 @@
 namespace homework
 
 module hw3 =
-    let rec firstExercise n = //rec
+    let rec firstExercise n = // rec
         if n < 0
         then failwith ("wrong index of fibnumber")
         elif n = 0 || n = 1
@@ -30,12 +30,12 @@ module hw3 =
         then n
         else
             let rec helper n prev curr =
-               if n = 0
-               then prev
-               else helper (n - 1) curr (prev + curr)
+                if n = 0
+                then prev
+                else helper (n - 1) curr (prev + curr)
             helper n 0 1
 
-    let fourthExercise n =
+    let fourthExercise n = //naive
         if n < 0
         then failwith("wrong number")
         elif n = 1 || n = 0
@@ -46,7 +46,7 @@ module hw3 =
             let result = out.[0].[0]
             result
 
-    let fifthExercise n =
+    let fifthExercise n = //optimized
         if n < 0
         then failwith("wrong number")
         elif n = 0 || n = 1
