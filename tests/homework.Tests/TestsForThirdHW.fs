@@ -22,54 +22,54 @@ let property firstFunc secondFunc (firstMsg: string) (secondMsg: string) =
 let equalTests =
     testList "equalTests" [
 
-        testEqual firstExercise 0 0 "test for rec #1"
+        testEqual fibRec 0 0 "test for rec #1"
 
-        testEqual firstExercise 2 1 "test for rec #2"
+        testEqual fibRec 2 1 "test for rec #2"
 
-        testEqual secondExercise 1 1 "test for iter #1"
+        testEqual fibIter 1 1 "test for iter #1"
 
-        testEqual secondExercise 3 2 "test for iter #2"
+        testEqual fibIter 3 2 "test for iter #2"
 
-        testEqual thirdExercise 4 3 "test for tail #1"
+        testEqual fibTail 4 3 "test for tail #1"
 
-        testEqual thirdExercise 5 5 "test for tail #2"
+        testEqual fibTail 5 5 "test for tail #2"
 
-        testEqual fourthExercise 0 0 "test for naive #1"
+        testEqual fibLogNaive 0 0 "test for naive #1"
 
-        testEqual fourthExercise 6 8 "test for naive #2"
+        testEqual fibLogNaive 6 8 "test for naive #2"
 
-        testEqual fifthExercise 8 21 "test for optimized #1"
+        testEqual fibLogOptim 8 21 "test for optimized #1"
 
-        testEqual fifthExercise 7 13 "test for optimized #2"
+        testEqual fibLogOptim 7 13 "test for optimized #2"
 
-        testThrow firstExercise -1 "recursive"
+        testThrow fibRec -1 "recursive"
 
-        testThrow secondExercise -13 "iter"
+        testThrow fibIter -13 "iter"
 
-        testThrow thirdExercise -7 "tail"
+        testThrow fibTail -7 "tail"
 
-        testThrow fourthExercise -4 "naive"
+        testThrow fibLogNaive -4 "naive"
 
-        testThrow fifthExercise -2 "optimized"
+        testThrow fibLogOptim -2 "optimized"
 
-        testThrow sixthExercise -10 "sequences"
+        testThrow fibSeq -10 "sequences"
     ]
 
 [<Tests>]
 let fibAutoTests =
     testList "testProperty for Fib exercises" [
 
-        property fourthExercise fifthExercise "naive" "optimized"
+        property fibLogNaive fibLogOptim "naive" "optimized"
 
-        property firstExercise fifthExercise "recursive" "optimized"
+        property fibRec fibLogOptim "recursive" "optimized"
 
-        property secondExercise fifthExercise "iter" "optimized"
+        property fibIter fibLogOptim "iter" "optimized"
 
-        property firstExercise secondExercise "recursive" "iter"
+        property fibRec fibIter "recursive" "iter"
 
-        property firstExercise thirdExercise "recursive" "tail"
+        property fibRec fibTail "recursive" "tail"
 
-        property thirdExercise fourthExercise "tail" "naive"
+        property fibTail fibLogNaive "tail" "naive"
     ]
 
 let throwTests =
@@ -83,15 +83,15 @@ let throwTests =
 
         testThrow (matrixes.optimizedPow matrixes.matrixForFib) -2 "pow matrix optimized"
 
-        testThrow firstExercise -1 "recursive"
+        testThrow fibRec -1 "recursive"
 
-        testThrow secondExercise -13 "iter"
+        testThrow fibIter -13 "iter"
 
-        testThrow thirdExercise -7 "tail"
+        testThrow fibTail -7 "tail"
 
-        testThrow fourthExercise -4 "naive"
+        testThrow fibLogNaive -4 "naive"
 
-        testThrow fifthExercise -2 "optimized"
+        testThrow fibLogOptim -2 "optimized"
 
-        testThrow sixthExercise -10 "sequences"
+        testThrow fibSeq -10 "sequences"
         ]

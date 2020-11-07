@@ -10,12 +10,12 @@ module Main =
         | FourthExercise1
         | FifthExercise1
         | SixthExercise1
-        | FirstExercise2
-        | SecondExercise2
-        | ThirdExercise2
-        | FourthExercise2
-        | FifthExercise2
-        | SixthExercise2
+        | FibonacciRec
+        | FibonacciIter
+        | FibonacciTail
+        | FibonacciLogNaive
+        | FibonacciLogOptim
+        | FibonacciSeq
 
         interface IArgParserTemplate with
             member s.Usage =
@@ -26,12 +26,12 @@ module Main =
                 | FourthExercise1 -> "start fourth exercise from second homework"
                 | FifthExercise1 -> "start fifth exercise from second homework"
                 | SixthExercise1 -> "start sixth exercise from second homework"
-                | FirstExercise2 -> "start first exercise from third homework"
-                | SecondExercise2 -> "start second exercise from third homework"
-                | ThirdExercise2 -> "start third exercise from third homework"
-                | FourthExercise2 -> "start fourth exercise from third homework"
-                | FifthExercise2 -> "start fifth exercise from third  homework"
-                | SixthExercise2 -> "start sixth exercise from third homework"
+                | FibonacciRec -> "start first exercise from third homework"
+                | FibonacciIter -> "start second exercise from third homework"
+                | FibonacciTail -> "start third exercise from third homework"
+                | FibonacciLogNaive -> "start fourth exercise from third homework"
+                | FibonacciLogOptim -> "start fifth exercise from third  homework"
+                | FibonacciSeq -> "start sixth exercise from third homework"
 
     [<EntryPoint>]
     let main (argv: string array) =
@@ -95,23 +95,23 @@ module Main =
             printf " the result of doing ex: "
             printf "%A" out
 
-        if results.Contains FirstExercise2
-        then noFlood hw3.firstExercise
+        if results.Contains FibonacciRec
+        then noFlood hw3.fibRec
 
-        if results.Contains SecondExercise2
-        then noFlood hw3.secondExercise
+        if results.Contains FibonacciIter
+        then noFlood hw3.fibIter
 
-        if results.Contains ThirdExercise2
-        then noFlood hw3.thirdExercise
+        if results.Contains FibonacciTail
+        then noFlood hw3.fibTail
 
-        if results.Contains FourthExercise2
-        then noFlood hw3.fourthExercise
+        if results.Contains FibonacciLogNaive
+        then noFlood hw3.fibLogNaive
 
-        if results.Contains FifthExercise2
-        then noFlood hw3.fifthExercise
+        if results.Contains FibonacciLogOptim
+        then noFlood hw3.fibLogOptim
 
-        if results.Contains SixthExercise2
-        then noFlood hw3.sixthExercise
+        if results.Contains FibonacciSeq
+        then noFlood hw3.fibSeq
 
         else
             parser.PrintUsage() |> printfn "%s"

@@ -1,14 +1,14 @@
 namespace homework
 
 module hw3 =
-    let rec firstExercise n = // rec
+    let rec fibRec n = // rec
         if n < 0
         then failwith ("wrong index of fibnumber")
         elif n = 0 || n = 1
         then n
-        else firstExercise (n - 1) + firstExercise (n - 2)
+        else fibRec (n - 1) + fibRec (n - 2)
 
-    let secondExercise n = //iter
+    let fibIter n = //iter
         if n < 0
         then failwith ("wrong index of fibnumber")
         elif n = 0 || n = 1
@@ -23,7 +23,7 @@ module hw3 =
                 b <- z
             z
 
-    let thirdExercise n = //tail
+    let fibTail n = //tail
         if n < 0
         then failwith("wrong number")
         elif n = 1 || n = 0
@@ -35,7 +35,7 @@ module hw3 =
                 else helper (n - 1) curr (prev + curr)
             helper n 0 1
 
-    let fourthExercise n = //naive
+    let fibLogNaive n = //naive
         if n < 0
         then failwith("wrong number")
         elif n = 1 || n = 0
@@ -46,7 +46,7 @@ module hw3 =
             let result = out.[0].[0]
             result
 
-    let fifthExercise n = //optimized
+    let fibLogOptim n = //optimized
         if n < 0
         then failwith("wrong number")
         elif n = 0 || n = 1
@@ -55,7 +55,7 @@ module hw3 =
              let out = matrixes.optimizedPow matrixes.matrixForFib (n - 1)
              out.[0].[0]
 
-    let sixthExercise n =
+    let fibSeq n =
        if n < 0
        then failwith("wrong number")
        else
