@@ -1,5 +1,6 @@
 module Tests
 
+open Microsoft.VisualStudio.TestPlatform.ObjectModel
 open homework
 open Expecto
 
