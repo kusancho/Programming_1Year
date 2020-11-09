@@ -17,7 +17,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Content Include="input.txt" />
     <Compile Include="sorts.fs" />
     <Compile Include="fourthHomework.fs" />
     <None Include="App.config" />

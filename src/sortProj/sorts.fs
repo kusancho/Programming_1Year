@@ -1,8 +1,4 @@
-namespace homework
-
-open System.Globalization
-
-module sorts =
+module sorts
 
     let swapArr (array: byref<array<int>>) i j =
         array.[i] <- array.[j] + array.[i]

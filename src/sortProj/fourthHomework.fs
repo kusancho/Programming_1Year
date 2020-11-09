@@ -1,9 +1,6 @@
-namespace homework
 
+module fourthHomework
 open System
-
-module fourthHomework =
-
     let readArray file =
         try
             let a = System.IO.File.ReadAllLines file
@@ -23,25 +20,37 @@ module fourthHomework =
         | :? FormatException ->
             failwith "Wrong format of data \n Hint: one int in line\n\n\n"
 
-    let firstEx file = //bubble sort for array
+    let readList file =
+        List.ofArray (readArray file)
+
+    let outArray path (list: array<int>) =
+        let mutable content = ""
+        for i in 0 .. list.Length - 1 do
+            content <- content + string list.[i] + "\n"
+        System.IO.File.WriteAllText (path, content)
+
+    let outList path (list: list<int>) =
+        outArray path (Array.ofList list)
+
+    let bSortArrayFromFile file = //bubble sort for array
         let array = readArray file
         let out = sorts.bubbleSortA array
-        printfn "sorted array: %A" out
+        out
 
-    let secondEx file = //qsort for array
+    let qSortArrayFromFile file = //qsort for array
         let array = readArray file
         sorts.quickSortA &array  //ref
-        printfn "sorted array: %A" array
+        array
 
-    let thirdEx file = //bubble sort for list
-        let list = List.ofArray <| readArray file
-        let out = sorts.bubbleSortL list            //не совсем копипаст, поэтому отдельными функциями
-        printfn "sorted list: %A" out
+    let bSortListFromFile file = //bubble sort for list
+        let list = readList file
+        let out = sorts.bubbleSortL list
+        out
 
-    let fourthEx file = //quick sort for list
-        let list = List.ofArray <| readArray file
+    let qSortListFromFile file = //quick sort for list
+        let list = readList file
         let out = sorts.quickSortL list
-        printfn "sorted list: %A" out
+        out
 
     let pack32To64 (first: int32) (second: int32) =
         if second < 0
@@ -52,12 +61,6 @@ module fourthHomework =
         let first = bigInt >>> 32 |> int32
         let second = (bigInt <<< 32) >>> 32 |> int32
         first, second
-
-    let fifthEx (array: array<int32>) = //(pack-unpack) in case when input (second argument) is negative number, first returned number less by one than first input number, function unpack64To32 too primitive to be problematic, so i improve pack function
-        let bigInt = pack32To64 array.[0] array.[1]
-        let first', second' = unpack64To32 bigInt
-        printfn "packed: %A" bigInt
-        printfn "unpacked 32 numbers: \n %A \n %A" first' second'
 
     let pack16To64 (first: int16) (second: int16) (third: int16) (fourth: int16) =
         let first32 = if second < 0s then (int32 (first + 1s) <<< 16) + (int32 second) else (int32 first <<< 16) + (int32 second)
@@ -70,9 +73,3 @@ module fourthHomework =
         let second = bigInt >>> 32 |> int16
         let first = bigInt >>> 48 |> int16
         first, second, third, fourth
-
-    let sixthEx (array: array<int16>) =
-        let bigInt = pack16To64 array.[0] array.[1] array.[2] array.[3]
-        let first', second', third', fourth' = unpack64To16 bigInt
-        printfn "packed: %A" bigInt
-        printfn "unpacked int16 numbers: \n %A \n %A \n %A \n %A" first' second' third' fourth'

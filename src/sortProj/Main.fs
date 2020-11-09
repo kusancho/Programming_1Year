@@ -1,63 +1,81 @@
-namespace homework
-
-open homework
+namespace sortProj
 
 module Main =
     open Argu
     open System
     type CLIArguments =
-        | FirstExercise
-        | SecondExercise
-        | ThirdExercise
-        | FourthExercise
-        | FifthExercise
-        | SixthExercise
+        | BubbleArray
+        | QuickArray
+        | BubbleList
+        | QuickList
+        | Packing32to64
+        | Packing16to64
+        | Unpack64to32
+        | Unpack64to16
 
         interface IArgParserTemplate with
             member s.Usage =
                 match s with
-                | FirstExercise -> "start first exercise from fourth homework"
-                | SecondExercise -> "start second exercise from fourth homework"
-                | ThirdExercise -> "start third exercise from fourth homework"
-                | FourthExercise -> "start fourth exercise from fourth homework"
-                | FifthExercise -> "start fifth exercise from fourth homework"
-                | SixthExercise -> "start sixth exercise from fourth homework"
+                | BubbleArray -> "start first exercise from fourth homework"
+                | QuickArray -> "start second exercise from fourth homework"
+                | BubbleList -> "start third exercise from fourth homework"
+                | QuickList -> "start fourth exercise from fourth homework"
+                | Packing32to64 -> "pack 32 to 64"
+                | Packing16to64 -> "pack 16 to 64"
+                | Unpack64to32 -> "unpack 64 to 32"
+                | Unpack64to16 -> "unpack 64 to 16"
 
     [<EntryPoint>]
     let main (argv: string array) =
         let parser = ArgumentParser.Create<CLIArguments>(programName = "homework")
         let results = parser.Parse(argv)
 
-        let killerOfCopyPaste exercise =
+        let template exercise writeCollection =
             printf "enter path: "
-            let file = Console.ReadLine()
-            exercise file
+            let pathToFile = Console.ReadLine()
+            let out = exercise pathToFile
+            printfn "sorted collection: %A" out
+            printf "enter path of out file: "
+            let outPath = Console.ReadLine()
+            writeCollection outPath out
 
-        if results.Contains FirstExercise
-        then killerOfCopyPaste fourthHomework.firstEx
+        let unpack funName =
+            printf "enter number to unpack: "
+            printfn "unpacked numbers: %A" (funName (Console.ReadLine() |> int64))
 
-        elif results.Contains SecondExercise
-        then killerOfCopyPaste fourthHomework.secondEx
+        if results.Contains BubbleArray
+        then template fourthHomework.bSortArrayFromFile fourthHomework.outArray
 
-        elif results.Contains ThirdExercise
-        then killerOfCopyPaste fourthHomework.thirdEx
+        elif results.Contains QuickArray
+        then template fourthHomework.qSortArrayFromFile fourthHomework.outArray
 
-        elif results.Contains FourthExercise
-        then killerOfCopyPaste fourthHomework.fourthEx
+        elif results.Contains BubbleList
+        then template fourthHomework.bSortListFromFile fourthHomework.outList
 
-        elif results.Contains FifthExercise
+        elif results.Contains QuickList
+        then template fourthHomework.qSortListFromFile fourthHomework.outList
+
+        elif results.Contains Packing32to64
         then
             printfn "enter 2 number: "
-            let array = Array.zeroCreate 2
-            for i = 0 to array.Length - 1 do array.[i] <- Console.ReadLine() |> int32
-            fourthHomework.fifthEx array
+            let first = Console.ReadLine() |> int32
+            let second = Console.ReadLine() |> int32
+            printfn "packed numbers: %A" (fourthHomework.pack32To64 first second)
 
-        elif results.Contains SixthExercise
+        elif results.Contains Packing16to64
         then
             printfn "enter 4 numbers: "
-            let array = Array.zeroCreate 4
-            for i = 0 to array.Length - 1 do array.[i] <- Console.ReadLine() |> int16
-            fourthHomework.sixthEx array
+            let first = Console.ReadLine() |> int16
+            let second = Console.ReadLine() |> int16
+            let third = Console.ReadLine() |> int16
+            let fourth = Console.ReadLine() |> int16
+            printfn "packed numbers: %A" (fourthHomework.pack16To64 first second third fourth)
+
+        elif results.Contains Unpack64to32
+        then unpack fourthHomework.unpack64To32
+
+        elif results.Contains Unpack64to16
+        then unpack fourthHomework.unpack64To16
 
         else
             parser.PrintUsage() |> printfn "%s"
