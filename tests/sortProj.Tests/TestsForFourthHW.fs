@@ -35,10 +35,10 @@ let propertyTestsOfArray =
 [<Tests>]
 let propertyTestsOfPackUnpack =
     testList "tests of pack unpack" [
-        testProperty "pack 16 to 64" <| fun (a: int16,b: int16,c: int16,d: int16) ->
-            Expect.equal (a,b,c,d) (fourthHomework.unpack64To16 (fourthHomework.pack16To64 a b c d)) ""
-        testProperty "pack" <| fun (a: int32,b: int32) ->
-            Expect.equal (a,b) (fourthHomework.unpack64To32 (fourthHomework.pack32To64 a b)) ""
+        testProperty "pack-unpack 16 to 64" <| fun (a: int16,b: int16,c: int16,d: int16) ->
+            Expect.equal (a,b,c,d) (fourthHomework.unpack64To16 (fourthHomework.pack16To64 a b c d))
+        testProperty "pack-unpack" <| fun (a: int32,b: int32) ->
+            Expect.equal (a,b) (fourthHomework.unpack64To32 (fourthHomework.pack32To64 a b))
     ]
 
 let propertyTestsOfList =
@@ -46,5 +46,3 @@ let propertyTestsOfList =
         propertyTesting List.sort sorts.bubbleSortL "bubble sort list"
         propertyTesting List.sort sorts.quickSortL "quick sort list"
     ]
-
-
