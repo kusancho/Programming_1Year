@@ -1,6 +1,8 @@
+namespace sortProj
 
-module fourthHomework
 open System
+module fourthHomework =
+
     let readArray file =
         try
             let a = System.IO.File.ReadAllLines file
@@ -20,7 +22,7 @@ open System
         | :? FormatException ->
             failwith "Wrong format of data \n Hint: one int in line\n\n\n"
 
-    let readList file =
+    let readList file = // :)
         List.ofArray (readArray file)
 
     let outArray path (list: array<int>) =
@@ -39,8 +41,7 @@ open System
 
     let qSortArrayFromFile file = //qsort for array
         let array = readArray file
-        sorts.quickSortA &array  //ref
-        array
+        sorts.quickSortA array
 
     let bSortListFromFile file = //bubble sort for list
         let list = readList file
