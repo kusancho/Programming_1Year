@@ -14,7 +14,7 @@ module sorts
                     if array.[j] > array.[j + 1] then swapArr &array j (j + 1)
             array
 
-    let rec hidRealiseQA (array: byref<array<int>>) (left: int) (right: int) = //qsort for range [l,r]
+    let rec hidRealiseQA (array: byref<array<int>>) left right = //qsort for range [l,r]
         if left <> right
         then
             let pivot = array.[left]
@@ -37,7 +37,7 @@ module sorts
             array
         else array
 
-    let rec quickSortL (inList: list<int>) =
+    let rec quickSortL inList =
         let rec split_ (list: list<int>) (left: list<int>) (right: list<int>) (pivot: list<int>) =
             if not list.IsEmpty
             then

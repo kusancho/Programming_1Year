@@ -25,13 +25,13 @@ module fourthHomework =
     let readList file = // :)
         List.ofArray (readArray file)
 
-    let outArray path (list: array<int>) =
+    let outArray path (array: array<int>) =
         let mutable content = ""
-        for i in 0 .. list.Length - 1 do
-            content <- content + string list.[i] + "\n"
+        for i in 0 .. array.Length - 1 do
+            content <- content + string array.[i] + "\n"
         System.IO.File.WriteAllText (path, content)
 
-    let outList path (list: list<int>) =
+    let outList path list =
         outArray path (Array.ofList list)
 
     let bSortArrayFromFile file = //bubble sort for array
