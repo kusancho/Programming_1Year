@@ -25,7 +25,7 @@ module fourthHomework =
     let readList file = // :)
         List.ofArray (readArray file)
 
-    let outArray path (array: array<int>) =
+    let outArray path (array: array<_>) =
         let mutable content = ""
         for i in 0 .. array.Length - 1 do
             content <- content + string array.[i] + "\n"
