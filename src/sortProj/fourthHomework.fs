@@ -3,13 +3,13 @@ namespace sortProj
 open System
 module fourthHomework =
 
-    let readArray file =
+    let readFile file =
         try
             let a = System.IO.File.ReadAllLines file
             let intArr = Array.zeroCreate a.Length
             let mutable j = 0
             for i in a do
-                intArr.[j] <- int (i.Trim())
+                intArr.[j] <- (i.Trim())
                 j <- j + 1
             intArr
         with
@@ -22,34 +22,37 @@ module fourthHomework =
         | :? FormatException ->
             failwith "Wrong format of data \n Hint: one int in line\n\n\n"
 
-    let readList file = // :)
-        List.ofArray (readArray file)
+    let readIntList file = // :)
+        List.ofArray (Array.map int (readFile file))
 
-    let outArray path (array: array<_>) =
+    let readIntArray file =
+        Array.map int (readFile file)
+
+    let outArray path (arr: array<_>) =
         let mutable content = ""
-        for i in 0 .. array.Length - 1 do
-            content <- content + string array.[i] + "\n"
+        for i in 0 .. arr.Length - 1 do
+            content <- content + (sprintf "%A" arr.[i]) + "\n"
         System.IO.File.WriteAllText (path, content)
 
     let outList path list =
         outArray path (Array.ofList list)
 
     let bSortArrayFromFile file = //bubble sort for array
-        let array = readArray file
+        let array = readIntArray file
         let out = sorts.bubbleSortA array
         out
 
     let qSortArrayFromFile file = //qsort for array
-        let array = readArray file
+        let array = readIntArray file
         sorts.quickSortA array
 
     let bSortListFromFile file = //bubble sort for list
-        let list = readList file
+        let list = readIntList file
         let out = sorts.bubbleSortL list
         out
 
     let qSortListFromFile file = //quick sort for list
-        let list = readList file
+        let list = readIntList file
         let out = sorts.quickSortL list
         out
 
