@@ -1,11 +1,11 @@
 module sorts
 
-    let swapArr (array: byref<array<int>>) i j =
+    let swapArr (array: byref<array<_>>) i j =
         let temp = array.[j]
         array.[j] <- array.[i]
         array.[i] <- temp
 
-    let bubbleSortA (array: array<int>) =
+    let bubbleSortA (array: array<_>) =
         if array.Length = 0 || array.Length = 1
         then array
         else
@@ -14,7 +14,7 @@ module sorts
                     if array.[j] > array.[j + 1] then swapArr &array j (j + 1)
             array
 
-    let rec hidRealiseQA (array: byref<array<int>>) left right = //qsort for range [l,r]
+    let rec hidRealiseQA (array: byref<array<_>>) left right = //qsort for range [l,r]
         if left <> right
         then
             let pivot = array.[left]
@@ -30,7 +30,7 @@ module sorts
                 hidRealiseQA &array left (border - 1)
                 hidRealiseQA &array border right
 
-    let quickSortA (array: array<int>) =
+    let quickSortA (array: array<_>) =
         if array.Length > 1
         then
             hidRealiseQA &array 0 (array.Length - 1)
@@ -38,7 +38,7 @@ module sorts
         else array
 
     let rec quickSortL inList =
-        let rec split_ (list: list<int>) (left: list<int>) (right: list<int>) (pivot: list<int>) =
+        let rec split_ (list: list<_>) (left: list<_>) (right: list<_>) (pivot: list<_>) =
             if not list.IsEmpty
             then
                 if pivot.Head > list.Head
@@ -53,9 +53,9 @@ module sorts
             out
         else inList
 
-    let bubbleSortL (list: list<int>) =
+    let bubbleSortL (list: list<_>) =
         let mutable newList = list
-        let rec bubble (left: list<int>) (middle: list<int>) (right: list<int>) = // in result the biggest element on top of list.
+        let rec bubble (left: list<_>) (middle: list<_>) (right: list<_>) = // in result the biggest element on top of list.
             match right with
             | [] -> left @ middle
             | _ ->

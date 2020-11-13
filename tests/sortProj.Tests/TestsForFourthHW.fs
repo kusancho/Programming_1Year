@@ -8,8 +8,12 @@ let templateTestCase func value =
         let test = func value
         Expect.equal test value (sprintf "there must be: %A" value)
 
-let propertyTesting func1 func2 msg =
-    testProperty (sprintf "comparison of %A with system sort " msg) <| fun n ->
+let propertyTestingArray func1 func2 msg =
+    testProperty (sprintf "comparison of %A with system sort " msg) <| fun (n: array<int>) ->
+        Expect.sequenceEqual (func1 n) (func2 n)
+
+let propertyTestingList func1 func2 msg =
+    testProperty (sprintf "comparison of %A with system sort " msg) <| fun (n: list<int>) ->
         Expect.sequenceEqual (func1 n) (func2 n)
 
 [<Tests>]
@@ -28,8 +32,8 @@ let testSortsOfArrayAndList =
 [<Tests>]
 let propertyTestsOfArray =
     testList "tests of my sorts of array on random data" [
-        propertyTesting Array.sort sorts.bubbleSortA "bubble sort array"
-        propertyTesting Array.sort sorts.quickSortA "quick sort array"
+        propertyTestingArray Array.sort sorts.bubbleSortA "bubble sort array"
+        propertyTestingArray Array.sort sorts.quickSortA "quick sort array"
     ]
 
 [<Tests>]
@@ -43,6 +47,6 @@ let propertyTestsOfPackUnpack =
 
 let propertyTestsOfList =
     testList "tests of my sorts of list on random data" [
-        propertyTesting List.sort sorts.bubbleSortL "bubble sort list"
-        propertyTesting List.sort sorts.quickSortL "quick sort list"
+        propertyTestingList List.sort sorts.bubbleSortL "bubble sort list"
+        propertyTestingList List.sort sorts.quickSortL "quick sort list"
     ]
