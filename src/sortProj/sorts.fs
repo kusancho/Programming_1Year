@@ -1,51 +1,51 @@
 module sorts
 
-    let swapArr (array: byref<array<_>>) i j =
-        let temp = array.[j]
-        array.[j] <- array.[i]
-        array.[i] <- temp
+    let swapArr (arr: array<_>) i j =
+        let temp = arr.[j]
+        arr.[j] <- arr.[i]
+        arr.[i] <- temp
 
-    let bubbleSortA (array: array<_>) =
-        if array.Length = 0 || array.Length = 1
-        then array
+    let bubbleSortA (arr: array<_>) =
+        if arr.Length = 0 || arr.Length = 1
+        then arr
         else
-            for i = array.Length - 1 downto 1 do
+            for i = arr.Length - 1 downto 1 do
                 for j = 0 to i - 1 do
-                    if array.[j] > array.[j + 1] then swapArr &array j (j + 1)
-            array
+                    if arr.[j] > arr.[j + 1] then swapArr arr j (j + 1)
+            arr
 
-    let rec hidRealiseQA (array: byref<array<_>>) left right = //qsort for range [l,r]
+    let rec hidRealiseQA (arr: array<_>) left right = //qsort for range [l,r]
         if left <> right
         then
-            let pivot = array.[left]
+            let pivot = arr.[left]
             let mutable border = left
             for i = left to right do
-                if pivot > array.[i]
+                if pivot > arr.[i]
                 then
-                    swapArr &array i border
+                    swapArr arr i border
                     border <- border + 1
             if border = left
-            then hidRealiseQA &array (left + 1) right
+            then hidRealiseQA arr (left + 1) right
             else
-                hidRealiseQA &array left (border - 1)
-                hidRealiseQA &array border right
+                hidRealiseQA arr left (border - 1)
+                hidRealiseQA arr border right
 
-    let quickSortA (array: array<_>) =
-        if array.Length > 1
+    let quickSortA (arr: array<_>) =
+        if arr.Length > 1
         then
-            hidRealiseQA &array 0 (array.Length - 1)
-            array
-        else array
+            hidRealiseQA arr 0 (arr.Length - 1)
+            arr
+        else arr
 
     let rec quickSortL inList =
-        let rec split_ (list: list<_>) (left: list<_>) (right: list<_>) (pivot: list<_>) =
-            if not list.IsEmpty
+        let rec split_ (myList: list<_>) (left: list<_>) (right: list<_>) (pivot: list<_>) =
+            if not myList.IsEmpty
             then
-                if pivot.Head > list.Head
-                then split_ list.Tail (left @ [list.Head]) right pivot
-                elif pivot.Head = list.Head
-                then split_ list.Tail left right (pivot @ [list.Head])
-                else split_ list.Tail left (right @ [list.Head]) pivot
+                if pivot.Head > myList.Head
+                then split_ myList.Tail (left @ [myList.Head]) right pivot
+                elif pivot.Head = myList.Head
+                then split_ myList.Tail left right (pivot @ [myList.Head])
+                else split_ myList.Tail left (right @ [myList.Head]) pivot
             else (quickSortL left) @ (quickSortL pivot) @ (quickSortL right)
         if inList.Length > 1
         then
@@ -53,8 +53,8 @@ module sorts
             out
         else inList
 
-    let bubbleSortL (list: list<_>) =
-        let mutable newList = list
+    let bubbleSortL (myList: list<_>) =
+        let mutable newList = myList
         let rec bubble (left: list<_>) (middle: list<_>) (right: list<_>) = // in result the biggest element on top of list.
             match right with
             | [] -> left @ middle
