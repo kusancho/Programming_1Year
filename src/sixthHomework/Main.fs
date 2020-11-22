@@ -18,7 +18,8 @@ module Main =
         if true
         then
             let mymatrix = myMatrix.readMyMatrix <| Console.ReadLine()
-            printf "%A" mymatrix.content
+            printf "enter path to out: "
+            myMatrix.outMyMatrix mymatrix <| Console.ReadLine()
 
         else
             parser.PrintUsage() |> printfn "%s"

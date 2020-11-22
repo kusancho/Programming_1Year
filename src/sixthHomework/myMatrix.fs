@@ -30,3 +30,26 @@ let readMyMatrix path =
                   if chars.[j] = char "1" then yield Coordinates(i*1<line>, j*1<row>)
           ]
     MyMatrix(binString.Length, length, listOfCoordinates)
+
+let outMyMatrix (myMatrix: MyMatrix) path =
+    let mutable content = myMatrix.content
+    let mutable out = ""
+    for i in 0..myMatrix.nLines - 1 do
+        for j in 0..myMatrix.nRows - 1 do
+            if not content.IsEmpty
+            then
+                let coordinate = content.Head
+                if coordinate.i = i*1<line> && coordinate.j = j*1<row>
+                then
+                    content <- content.Tail
+                    out <- out + "1"
+                else out <- out + "0"
+            else out <- out + "0"
+        out <- out + "\n"
+    File.WriteAllText (path, out)
+
+
+
+
+
+

@@ -21,6 +21,7 @@
     <Compile Include="myMatrix.fs" />
     <Compile Include="Main.fs" />
     <Content Include="inputmatrix.txt" />
+    <Content Include="out.txt" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />
