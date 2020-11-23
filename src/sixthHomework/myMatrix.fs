@@ -12,7 +12,7 @@ type Coordinates =
     new(I,J) = {i = I; j = J }
 
 [<Struct>]
-type MyMatrix =
+type SparseMatrix =
     val nLines: int
     val nRows: int
     val content: list<Coordinates>
@@ -29,9 +29,9 @@ let readMyMatrix path =
               for j in 0..binString.[i].Length - 1 do
                   if chars.[j] = char "1" then yield Coordinates(i*1<line>, j*1<row>)
           ]
-    MyMatrix(binString.Length, length, listOfCoordinates)
+    SparseMatrix(binString.Length, length, listOfCoordinates)
 
-let outMyMatrix (myMatrix: MyMatrix) path =
+let outSparseMatrix (myMatrix: SparseMatrix) path =
     let mutable content = myMatrix.content
     let mutable out = ""
     for i in 0..myMatrix.nLines - 1 do
@@ -47,6 +47,27 @@ let outMyMatrix (myMatrix: MyMatrix) path =
             else out <- out + "0"
         out <- out + "\n"
     File.WriteAllText (path, out)
+
+let multiplyingSparseMatrix (m1: SparseMatrix) (m2: SparseMatrix) =
+    if m1.nRows <> m2.nLines then failwith "can't multiply, wrong size"
+    let mutable resList = []
+    for firstMult in m1.content do
+        for sndMult in m2.content do
+            if int firstMult.j = int sndMult.i
+            then resList <- resList @ [Coordinates(firstMult.i, sndMult.j)]
+    SparseMatrix(int m1.nRows, int m2.nLines, resList)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
