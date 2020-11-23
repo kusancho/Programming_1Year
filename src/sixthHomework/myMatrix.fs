@@ -56,21 +56,3 @@ let multiplyingSparseMatrix (m1: SparseMatrix) (m2: SparseMatrix) =
             if int firstMult.j = int sndMult.i
             then resList <- resList @ [Coordinates(firstMult.i, sndMult.j)]
     SparseMatrix(int m1.nRows, int m2.nLines, resList)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
