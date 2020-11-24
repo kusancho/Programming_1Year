@@ -7,33 +7,33 @@ open myMatrix
 let multiplyingSparseMatrixes =
     testList "tests of my function of multiplying" [
         testCase "test #1" <| fun _ ->
-            let fstMatrix = SparseMatrix(2, 2, [Coordinates(0<line>, 1<row>)])
-            let sndMatrix = SparseMatrix(2, 3, [Coordinates(1<line>, 0<row>);
-                                         Coordinates(1<line>, 2<row>)])
-            let res = multiplyingSparseMatrix fstMatrix sndMatrix
-            Expect.equal res.content [Coordinates(0<line>, 0<row>); Coordinates(0<line>, 2<row>)] ""
+            let fstMatrix = BoolMatrix(2, 2, [Coordinates(0<line>, 1<col>)])
+            let sndMatrix = BoolMatrix(2, 3, [Coordinates(1<line>, 0<col>);
+                                         Coordinates(1<line>, 2<col>)])
+            let res = multiplyingBoolMatrix fstMatrix sndMatrix
+            Expect.equal res.content [Coordinates(0<line>, 0<col>); Coordinates(0<line>, 2<col>)] ""
 
         testCase "test #2" <| fun _ ->
-            let fstMatrix = SparseMatrix(3, 3, [Coordinates(1<line>, 1<row>); Coordinates(2<line>, 2<row>)])
-            let sndMatrix = SparseMatrix(3, 1, [Coordinates(2<line>, 0<row>)])
-            let res = multiplyingSparseMatrix fstMatrix sndMatrix
-            Expect.equal res.content [Coordinates(2<line>, 0<row>)] ""
+            let fstMatrix = BoolMatrix(3, 3, [Coordinates(1<line>, 1<col>); Coordinates(2<line>, 2<col>)])
+            let sndMatrix = BoolMatrix(3, 1, [Coordinates(2<line>, 0<col>)])
+            let res = multiplyingBoolMatrix fstMatrix sndMatrix
+            Expect.equal res.content [Coordinates(2<line>, 0<col>)] ""
 
         testCase "test on empty matrix" <| fun _ ->
-            let fstMatrix = SparseMatrix(3, 3, [Coordinates(1<line>, 1<row>); Coordinates(2<line>, 2<row>)])
-            let sndMatrix = SparseMatrix(3, 9, [])
-            let res = multiplyingSparseMatrix fstMatrix sndMatrix
+            let fstMatrix = BoolMatrix(3, 3, [Coordinates(1<line>, 1<col>); Coordinates(2<line>, 2<col>)])
+            let sndMatrix = BoolMatrix(3, 9, [])
+            let res = multiplyingBoolMatrix fstMatrix sndMatrix
             Expect.equal res.content [] ""
 
         testCase "test on identity matrix" <| fun _ ->
-            let fstMatrix = SparseMatrix(3, 3, [Coordinates(1<line>, 1<row>); Coordinates(2<line>, 2<row>)])
-            let sndMatrix = SparseMatrix(3, 3, [Coordinates(0<line>, 0<row>); Coordinates(1<line>, 1<row>)
-                                                Coordinates(2<line>, 2<row>)])
-            let res = multiplyingSparseMatrix fstMatrix sndMatrix
-            Expect.equal res.content [Coordinates(1<line>, 1<row>); Coordinates(2<line>, 2<row>)] ""
+            let fstMatrix = BoolMatrix(3, 3, [Coordinates(1<line>, 1<col>); Coordinates(2<line>, 2<col>)])
+            let sndMatrix = BoolMatrix(3, 3, [Coordinates(0<line>, 0<col>); Coordinates(1<line>, 1<col>);
+                                                Coordinates(2<line>, 2<col>)])
+            let res = multiplyingBoolMatrix fstMatrix sndMatrix
+            Expect.equal res.content [Coordinates(1<line>, 1<col>); Coordinates(2<line>, 2<col>)] ""
 
         testCase "throw test" <| fun _ ->
-            let fstMatrix = SparseMatrix (1,1, [Coordinates(0<line>, 0<row>)])
-            let sndMatrix = SparseMatrix (2,1, [Coordinates(1<line>, 0<row>)])
-            Expect.throws ( fun _ -> (multiplyingSparseMatrix fstMatrix sndMatrix) |> ignore) "exception doesn't works"
+            let fstMatrix = BoolMatrix (1,1, [Coordinates(0<line>, 0<col>)])
+            let sndMatrix = BoolMatrix (2,1, [Coordinates(1<line>, 0<col>)])
+            Expect.throws ( fun _ -> (multiplyingBoolMatrix fstMatrix sndMatrix) |> ignore) "exception doesn't works"
     ]

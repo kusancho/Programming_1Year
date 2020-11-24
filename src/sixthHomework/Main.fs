@@ -6,10 +6,10 @@ module Main =
     [<EntryPoint>]
     let main (argv: string array) =
         printfn "enter path of first matrix: "
-        let firstMatrix = myMatrix.readMyMatrix <| Console.ReadLine()
+        let firstMatrix = myMatrix.readBoolMatrix <| Console.ReadLine()
         printfn "enter path of second matrix: "
-        let sndMatrix = myMatrix.readMyMatrix <| Console.ReadLine()
-        let result = myMatrix.multiplyingSparseMatrix firstMatrix sndMatrix
+        let sndMatrix = myMatrix.readBoolMatrix <| Console.ReadLine()
+        let result = myMatrix.multiplyingBoolMatrix firstMatrix sndMatrix
         printfn "enter path of output file: "
-        myMatrix.outSparseMatrix result <| Console.ReadLine()
+        myMatrix.outBoolMatrix result <| Console.ReadLine()
         0
