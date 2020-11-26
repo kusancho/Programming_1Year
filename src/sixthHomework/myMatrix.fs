@@ -27,26 +27,25 @@ let readBoolMatrix path =
               if binString.[i].Length <> length then failwith "wrong matrix"
               let chars = binString.[i]
               for j in 0..binString.[i].Length - 1 do
-                  if chars.[j] = char "1" then Coordinates(i*1<line>, j*1<col>)
+                  if chars.[j] = char "1" then Coordinates(i * 1<line>, j * 1<col>)
           ]
     BoolMatrix(binString.Length, length, listOfCoordinates)
 
 let outBoolMatrix (myMatrix: BoolMatrix) path =
-    let mutable content = myMatrix.content
-    let mutable out = ""
-    for i in 0..myMatrix.nLines - 1 do
-        for j in 0..myMatrix.nRows - 1 do
-            if not content.IsEmpty
-            then
-                let coordinate = content.Head
-                if coordinate.i = i*1<line> && coordinate.j = j*1<col>
-                then
-                    content <- content.Tail
-                    out <- out + "1"
-                else out <- out + "0"
-            else out <- out + "0"
-        out <- out + "\n"
-    File.WriteAllText (path, out)
+    let rec makeString line col string (content: list<Coordinates>) =
+        if line = myMatrix.nLines && col = 0
+        then string
+        elif line = myMatrix.nRows
+        then
+            if not content.IsEmpty && content.Head.i = line * 1<line> && content.Head.j = col * 1<col>
+            then makeString (line + 1) 0 (string + "1" + "\n") content.Tail
+            else makeString (line + 1) 0 (string + "0" + "\n") content
+        else
+            if not content.IsEmpty && content.Head.i = line * 1<line> && content.Head.j = col * 1<col>
+            then makeString line (col + 1) (string + "1") content.Tail
+            else makeString line (col + 1) (string + "0") content
+    let str = makeString 0 0 "" (List.sort myMatrix.content)
+    File.WriteAllText (path, str)
 
 let multiplyingBoolMatrix (m1: BoolMatrix) (m2: BoolMatrix) =
     if m1.nRows <> m2.nLines then failwith "can't multiply, wrong size"

@@ -19,7 +19,10 @@
     <Compile Include="AssemblyInfo.fs" />
     <None Include="App.config" />
     <Compile Include="myMatrix.fs" />
+    <Content Include="1.txt" />
     <Compile Include="Main.fs" />
+    <Content Include="2.txt" />
+    <Content Include="out.txt" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />
