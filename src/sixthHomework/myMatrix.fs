@@ -31,28 +31,19 @@ let readBoolMatrix path =
           ]
     BoolMatrix(binString.Length, length, listOfCoordinates)
 
-let compareCoordAscend (fstCoord: Coordinates) (sndCoord: Coordinates) =
-    if fstCoord.i < sndCoord.i
-    then 0
-    elif fstCoord.i = sndCoord.i && fstCoord.j < sndCoord.j
-    then 0
-    else 1
-
 let outBoolMatrix (myMatrix: BoolMatrix) path =
-    let rec makeString line col string (content: list<Coordinates>) =
-        if line = myMatrix.nLines && col = 0
-        then string
-        elif line = myMatrix.nRows
-        then
-            if not content.IsEmpty && content.Head.i = line * 1<line> && content.Head.j = col * 1<col>
-            then makeString (line + 1) 0 (string + "1" + "\n") content.Tail
-            else makeString (line + 1) 0 (string + "0" + "\n") content
-        else
-            if not content.IsEmpty && content.Head.i = line * 1<line> && content.Head.j = col * 1<col>
-            then makeString line (col + 1) (string + "1") content.Tail
-            else makeString line (col + 1) (string + "0") content
-    let str = makeString 0 0 "" (List.sort myMatrix.content)
-    File.WriteAllText (path, str)
+    let charArr = [|for _ in 1..myMatrix.nLines -> Array.replicate myMatrix.nRows '0'|]
+    for coord in myMatrix.content do
+        let i = int coord.i
+        let j = int coord.j
+        charArr.[i].[j] <- '1'
+    let arrOfStr = [|for _ in 1..myMatrix.nLines -> "" |]
+    for i in 0..myMatrix.nLines - 1 do
+        let mutable str = ""
+        for j in 0..myMatrix.nRows - 1  do
+            str <- str + (string charArr.[i].[j])
+        arrOfStr.[i] <- str
+    File.WriteAllLines (path, arrOfStr)
 
 let multiplyingBoolMatrix (m1: BoolMatrix) (m2: BoolMatrix) =
     if m1.nRows <> m2.nLines then failwith "can't multiply, wrong size"
