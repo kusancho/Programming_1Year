@@ -16,7 +16,7 @@ type BoolMatrix =
     val nLines: int
     val nRows: int
     val content: list<Coordinates>
-    new(i,j,k) = { nLines = i; nRows = j; content = List.sort k }
+    new(i,j,k) = { nLines = i; nRows = j; content = k }
 
 let readBoolMatrix path =
     let binString = File.ReadAllLines path
@@ -30,6 +30,13 @@ let readBoolMatrix path =
                   if chars.[j] = char "1" then Coordinates(i * 1<line>, j * 1<col>)
           ]
     BoolMatrix(binString.Length, length, listOfCoordinates)
+
+let compareCoordAscend (fstCoord: Coordinates) (sndCoord: Coordinates) =
+    if fstCoord.i < sndCoord.i
+    then 0
+    elif fstCoord.i = sndCoord.i && fstCoord.j < sndCoord.j
+    then 0
+    else 1
 
 let outBoolMatrix (myMatrix: BoolMatrix) path =
     let rec makeString line col string (content: list<Coordinates>) =
