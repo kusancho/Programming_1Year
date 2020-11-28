@@ -20,9 +20,6 @@
     <None Include="App.config" />
     <Compile Include="myMatrix.fs" />
     <Compile Include="Main.fs" />
-    <Content Include="NewFile2.txt" />
-    <Content Include="NewFile3.txt" />
-    <Content Include="NewFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />

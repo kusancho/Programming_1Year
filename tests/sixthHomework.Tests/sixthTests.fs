@@ -49,7 +49,7 @@ let listOfCoordinatesToArrayOfInt (listOfCoordinates: list<Coordinates>) =
 [<Tests>]
 let outInput =
     testList "test of output and input function of sparse matrix" [
-        testCase "" <| fun _ ->
+        testCase "output/input" <| fun _ ->
             let inPath: string = "/home/kusancho/progahw/homework/tests/sixthHomework.Tests/inputMatrix.txt"
             let outPath: string  = "/home/kusancho/progahw/homework/tests/sixthHomework.Tests/output.txt"
             let inBoolMatrixFirst = readBoolMatrix inPath
