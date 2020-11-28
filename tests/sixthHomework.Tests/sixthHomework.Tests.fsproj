@@ -7,6 +7,8 @@
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="sixthTests.fs" />
+        <Content Include="inputMatrix.txt" />
+        <Content Include="output.txt" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>

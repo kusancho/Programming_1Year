@@ -37,3 +37,25 @@ let multiplyingSparseMatrixes =
             let sndMatrix = BoolMatrix (2,1, [Coordinates(1<line>, 0<col>)])
             Expect.throws ( fun _ -> (multiplyingBoolMatrix fstMatrix sndMatrix) |> ignore) "exception doesn't works"
     ]
+
+let listOfCoordinatesToArrayOfInt (listOfCoordinates: list<Coordinates>) =
+    let arrCoordinates = Array.ofList listOfCoordinates
+    let arr = Array.zeroCreate (2 * arrCoordinates.Length)
+    for i in 0..2..arrCoordinates.Length - 1 do
+        arr.[i] <- int arrCoordinates.[i].i
+        arr.[i + 1] <- int arrCoordinates.[i].j
+    arr
+
+[<Tests>]
+let outInput =
+    testList "test of output and input function of sparse matrix" [
+        testCase "" <| fun _ ->
+            let inPath: string = "/home/kusancho/progahw/homework/tests/sixthHomework.Tests/inputMatrix.txt"
+            let outPath: string  = "/home/kusancho/progahw/homework/tests/sixthHomework.Tests/output.txt"
+            let inBoolMatrixFirst = readBoolMatrix inPath
+            outBoolMatrix inBoolMatrixFirst outPath
+            let inBoolMatrixSecond = readBoolMatrix outPath
+            let fstArr = listOfCoordinatesToArrayOfInt inBoolMatrixFirst.content
+            let sndArr = listOfCoordinatesToArrayOfInt inBoolMatrixSecond.content
+            Expect.equal fstArr sndArr "input output function written wrong"
+    ]
