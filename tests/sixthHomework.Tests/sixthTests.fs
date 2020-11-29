@@ -50,8 +50,8 @@ let listOfCoordinatesToArrayOfInt (listOfCoordinates: list<Coordinates>) =
 let outInput =
     testList "test of output and input function of sparse matrix" [
         testCase "output/input" <| fun _ ->
-            let inPath: string = "/home/kusancho/progahw/homework/tests/sixthHomework.Tests/inputMatrix.txt"
-            let outPath: string  = "/home/kusancho/progahw/homework/tests/sixthHomework.Tests/output.txt"
+            let inPath: string = __SOURCE_DIRECTORY__ + "/inputMatrix.txt"
+            let outPath: string  = __SOURCE_DIRECTORY__ + "/output.txt"
             let inBoolMatrixFirst = readBoolMatrix inPath
             outBoolMatrix inBoolMatrixFirst outPath
             let inBoolMatrixSecond = readBoolMatrix outPath
