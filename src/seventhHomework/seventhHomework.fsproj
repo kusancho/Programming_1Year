@@ -18,6 +18,8 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="MyList.fs" />
+    <Compile Include="MyTree.fs" />
+    <Compile Include="MyString.fs" />
     <None Include="App.config" />
     <Compile Include="Main.fs" />
   </ItemGroup>

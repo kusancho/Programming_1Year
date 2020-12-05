@@ -1,7 +1,5 @@
 module MyList
 
-open System
-
 type MyList<'T> =
     | Last of 'T
     | Cons of 'T * MyList<'T>
@@ -13,7 +11,7 @@ type MyList<'T> =
             | Cons(_, tl) -> calculateLength (acc + 1) tl
         calculateLength 0 this
 
-    member this.rev =
+    member this.Rev =
         if this.Length > 1
         then
             let rec reversing acc lst =
@@ -33,28 +31,62 @@ type MyList<'T> =
         | Last _ -> failwith "tail doesn't exist"
         | Cons (_, tl) -> tl
 
-let makeMyListOfList (lst: list<'T>) =
-    match lst.Length with
-    | 0 -> failwith "myList is nonEmpty list"
-    | 1 -> (Last lst.Head)
-    | _ ->
-        let rec hidReal (myLst: MyList<_>) (lst: list<_>) =
+    member this.Map func =
+        let rec hidReal fstLst sndLst =
+            match fstLst with
+            | Last value -> Cons(func value, sndLst)
+            | Cons (fst, snd) -> hidReal snd (Cons (func fst, sndLst))
+        (hidReal this.Tail (Last <| func this.Head)).Rev
+
+    member this.Iter func =
+        let rec hidReal lst =
             match lst with
-            | [] -> failwith "myList is nonEmpty list"
-            | [a] -> Cons(a, myLst)
-            | hd :: tl -> hidReal (Cons(hd, myLst)) tl
-        hidReal (Last (List.rev lst).Head) (List.rev lst).Tail
+            | Last value -> func value
+            | Cons (fst, snd) ->
+                func fst
+                hidReal snd
+        hidReal this
 
-let concatMyLists (fstLst: MyList<_>) (sndLst: MyList<_>) =
-    let rec hidReal fstLst sndLst =
-        match fstLst with
-        | Last value -> Cons(value, sndLst)
-        | Cons (hd, tl) -> hidReal tl (Cons(hd, sndLst))
-    hidReal fstLst.rev sndLst
+    static member ofList (lst: list<'T>) =
+        match lst.Length with
+        | 0 -> failwith "myList is nonEmpty list"
+        | 1 -> (Last lst.Head)
+        | _ ->
+            let rec hidReal (myLst: MyList<'T>) (lst: list<'T>) =
+                match lst with
+                | [] -> failwith "myList is nonEmpty list"
+                | [a] -> Cons(a, myLst)
+                | hd :: tl -> hidReal (Cons(hd, myLst)) tl
+            hidReal (Last (List.rev lst).Head) (List.rev lst).Tail
 
-let makeListOfMyList (myLst: MyList<'T>) =
-    let rec hidReal (acc: list<'T>) (ost: MyList<'T>) =
-        match ost with
-        | Last value -> acc @ [value]
-        | Cons(value, myLst) -> hidReal (acc @ [value]) myLst
-    hidReal [] myLst
+    static member toList (myLst: MyList<'T>) =
+        let rec hidReal (acc: list<'T>) (ost: MyList<'T>) =
+            match ost with
+            | Last value -> acc @ [value]
+            | Cons(value, myLst) -> hidReal (acc @ [value]) myLst
+        hidReal [] myLst
+
+    static member Concat (fst: MyList<'T>) (snd: MyList<'T>) =
+        let rec hidReal fstLst sndLst =
+            match fstLst with
+            | Last value -> Cons(value, sndLst)
+            | Cons (hd, tl) -> hidReal tl (Cons(hd, sndLst))
+        hidReal fst.Rev snd
+
+let sortMyList (myLst: MyList<'T>) =
+    let rec maxToTop myLst =
+        match myLst with
+        | Last value -> Last value
+        | Cons(fst, Last snd) when fst > snd -> Cons(snd, Last fst)
+        | Cons(fst, Last snd) -> Cons(fst, Last snd)
+        | Cons(fst, Cons(snd, thd)) when fst > snd -> Cons(snd, maxToTop (Cons(fst, thd)))
+        | Cons(fst, Cons(snd, thd)) -> Cons(fst, maxToTop (Cons(snd,thd)))
+
+    let rec cicle (iter: int) (myLst: MyList<'T>) =
+        match iter with
+        | iter when iter = myLst.Length -> myLst
+        | _ -> cicle (iter + 1) (maxToTop myLst)
+
+    if myLst.Length = 1
+    then myLst
+    else cicle 0 myLst
