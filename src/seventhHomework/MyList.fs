@@ -47,6 +47,15 @@ type MyList<'T> =
                 hidReal snd
         hidReal this
 
+    static member Fold func acc (myLst: MyList<'T>) =
+        //let rec hidReal func' acc' (myLst': MyList<'T>) =
+            match myLst with
+            | Last value -> func acc value
+            | Cons(fst, snd) -> MyList.Fold func (func acc fst) snd
+        //hidReal func acc myLst
+
+
+
     static member ofList (lst: list<'T>) =
         match lst.Length with
         | 0 -> failwith "myList is nonEmpty list"
