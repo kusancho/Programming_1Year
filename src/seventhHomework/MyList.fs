@@ -32,11 +32,14 @@ type MyList<'T> =
         | Cons (_, tl) -> tl
 
     member this.Map func =
-        let rec hidReal fstLst sndLst =
-            match fstLst with
-            | Last value -> Cons(func value, sndLst)
-            | Cons (fst, snd) -> hidReal snd (Cons (func fst, sndLst))
-        (hidReal this.Tail (Last <| func this.Head)).Rev
+        if this.Length > 1
+        then
+            let rec hidReal fstLst sndLst =
+                match fstLst with
+                | Last value -> Cons(func value, sndLst)
+                | Cons (fst, snd) -> hidReal snd (Cons (func fst, sndLst))
+            (hidReal this.Tail (Last <| func this.Head)).Rev
+        else Last (func this.Head)
 
     member this.Iter func =
         let rec hidReal lst =
@@ -48,13 +51,9 @@ type MyList<'T> =
         hidReal this
 
     static member Fold func acc (myLst: MyList<'T>) =
-        //let rec hidReal func' acc' (myLst': MyList<'T>) =
-            match myLst with
-            | Last value -> func acc value
-            | Cons(fst, snd) -> MyList.Fold func (func acc fst) snd
-        //hidReal func acc myLst
-
-
+        match myLst with
+        | Last value -> func acc value
+        | Cons(fst, snd) -> MyList.Fold func (func acc fst) snd
 
     static member ofList (lst: list<'T>) =
         match lst.Length with

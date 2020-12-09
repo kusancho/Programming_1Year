@@ -1,12 +1,14 @@
 namespace seventhHomework
 
+open System
 open MyList
 open MyString
+open MyTree
 
 module Main =
 
     [<EntryPoint>]
     let main (argv: string array) =
-        let str = Cons(9,Cons(8,Last 4))
-        printf "%A" <| MyList.Fold (fun acc elem -> elem + acc ) 0 str
+        let tree = (Node(8, Last (Node (2, Last (Leaf 2)))))
+
         0
