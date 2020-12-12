@@ -6,17 +6,13 @@ type MyTree<'T> =
     | Node of 'T * MyList<MyTree<'T>>
     | Leaf of 'T
 
-let rec foldTree func acc (myTree: MyTree<'T>) =
-    match myTree with
-    | Leaf value -> (func acc value)
-    | Node (fst, myLst) -> func (MyList.Fold func acc (myLst.Map (fun x -> foldTree func acc x))) fst
+    static member fold func acc (tree: MyTree<'T>) =
+        match tree with
+        | Leaf x -> func acc x
+        | Node (x, tail) -> MyList.fold (fun acc t -> MyTree.fold func acc t) (func acc x) tail
 
+let averageValInTree (tree: MyTree<int>) =
+    (float <| MyTree.fold (fun acc x -> acc + x) 0 tree) / (float <| MyTree.fold (fun acc _ -> acc + 1) 0 tree)
 
-//let sumOfIntTree (tree: MyTree<'T>) =
-   // foldTree (fun acc x -> acc + x) 0 tree
-
-//let countElemInMyTree (tree: MyTree<_>) =
-   // foldTree (fun acc _ -> acc + 1) 0 tree
-
-//let averageValueInMyTree (tree: MyTree<_>) =
-   // (float (sumOfIntTree tree))/(float (countElemInMyTree tree))
+let maxInTree (tree: MyTree<int>) =
+    MyTree.fold (fun acc x -> if acc > x then acc else x) System.Int32.MinValue tree

@@ -5,21 +5,7 @@ type MyList<'T> =
     | Cons of 'T * MyList<'T>
 
     member this.Length =
-        let rec calculateLength acc lst =
-            match lst with
-            | Last _ -> (acc + 1)
-            | Cons(_, tl) -> calculateLength (acc + 1) tl
-        calculateLength 0 this
-
-    member this.Rev =
-        if this.Length > 1
-        then
-            let rec reversing acc lst =
-                match lst with
-                | Last value -> Cons(value, acc)
-                | Cons (fst, snd) -> reversing (Cons(fst, acc)) snd
-            reversing (Last this.Head) this.Tail
-        else this
+        MyList.fold (fun acc _ -> acc + 1) 0 this
 
     member this.Head =
         match this with
@@ -31,29 +17,39 @@ type MyList<'T> =
         | Last _ -> failwith "tail doesn't exist"
         | Cons (_, tl) -> tl
 
-    member this.Map func =
-        if this.Length > 1
+    static member rev (myLst: MyList<'T>) =
+            if myLst.Length > 1
+            then
+                let rec reversing acc lst =
+                    match lst with
+                    | Last value -> Cons(value, acc)
+                    | Cons (fst, snd) -> reversing (Cons(fst, acc)) snd
+                reversing (Last myLst.Head) myLst.Tail
+            else myLst
+
+    static member map func (myLst: MyList<'T>) =
+        if myLst.Length > 1
         then
             let rec hidReal fstLst sndLst =
                 match fstLst with
                 | Last value -> Cons(func value, sndLst)
                 | Cons (fst, snd) -> hidReal snd (Cons (func fst, sndLst))
-            (hidReal this.Tail (Last <| func this.Head)).Rev
-        else Last (func this.Head)
+            MyList.rev (hidReal myLst.Tail (Last <| func myLst.Head))
+        else Last (func myLst.Head)
 
-    member this.Iter func =
+    static member iter func myLst =
         let rec hidReal lst =
             match lst with
             | Last value -> func value
             | Cons (fst, snd) ->
                 func fst
                 hidReal snd
-        hidReal this
+        hidReal myLst
 
-    static member Fold func acc (myLst: MyList<'T>) =
+    static member fold func acc (myLst: MyList<'T>) =
         match myLst with
         | Last value -> func acc value
-        | Cons(fst, snd) -> MyList.Fold func (func acc fst) snd
+        | Cons(fst, snd) -> MyList.fold func (func acc fst) snd
 
     static member ofList (lst: list<'T>) =
         match lst.Length with
@@ -74,12 +70,12 @@ type MyList<'T> =
             | Cons(value, myLst) -> hidReal (acc @ [value]) myLst
         hidReal [] myLst
 
-    static member Concat (fst: MyList<'T>) (snd: MyList<'T>) =
+    static member concat (fst: MyList<'T>) (snd: MyList<'T>) =
         let rec hidReal fstLst sndLst =
             match fstLst with
             | Last value -> Cons(value, sndLst)
             | Cons (hd, tl) -> hidReal tl (Cons(hd, sndLst))
-        hidReal fst.Rev snd
+        hidReal (MyList.rev fst) snd
 
 let sortMyList (myLst: MyList<'T>) =
     let rec maxToTop myLst =

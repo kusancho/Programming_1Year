@@ -20,8 +20,8 @@
     <Compile Include="MyList.fs" />
     <Compile Include="MyTree.fs" />
     <Compile Include="MyString.fs" />
-    <None Include="App.config" />
     <Compile Include="Main.fs" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />
