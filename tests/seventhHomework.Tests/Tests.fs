@@ -38,10 +38,10 @@ let testPropertyForMyList =
             Expect.equal (MyList.toList (MyList.concat myLst1 myLst2)) (lst1 @ lst2) "concat doesn't work"
 
         testProperty "fold test" <| fun (size: int) ->
-            let lst = makeList size
-            let myLst = MyList.ofList lst
+            let lst = List.map float (makeList size)
+            let myLst = MyList.map float (MyList.ofList lst)
             let func x = (/) x
-            Expect.equal (MyList.fold func 0 myLst) (List.fold func 0 lst ) "fold doesn't work"
+            Expect.equal (MyList.fold func 1. myLst) (List.fold func 1. lst ) "fold doesn't work"
 
         testProperty "length test" <| fun (size: int) ->
             let lst = makeList size

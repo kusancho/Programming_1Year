@@ -12,9 +12,8 @@ type MyTree<'T> =
         | Node (x, tail) -> MyList.fold (fun acc t -> MyTree.fold func acc t) (func acc x) tail
 
 let averageValInTree (tree: MyTree<int>) =
-     let tuple = MyTree.fold (fun (fst, snd) x -> fst + x, snd + 1) (0, 0) tree
-     match tuple with
-     | (x, y) -> float x / float y
+     let (x,y) = MyTree.fold (fun (fst, snd) x -> fst + x, snd + 1) (0, 0) tree
+     float x / float y
 
 let maxInTree (tree: MyTree<int>) =
     MyTree.fold (fun acc x -> if acc > x then acc else x) System.Int32.MinValue tree

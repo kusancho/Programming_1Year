@@ -23,14 +23,9 @@ type MyList<'T> =
         | Cons(_, tl) -> tl
 
     static member rev (myLst: MyList<'T>) =
-        if myLst.Length > 1
-        then
-            let rec reversing acc lst =
-                match lst with
-                | Last value -> Cons(value, acc)
-                | Cons (fst, snd) -> reversing (Cons(fst, acc)) snd
-            reversing (Last myLst.Head) myLst.Tail
-        else myLst
+        match myLst with
+        | Last value -> Last value
+        | Cons(fst, snd) -> MyList.fold (fun acc elem -> Cons(elem, acc)) (Last fst) snd
 
     static member map func (myLst: MyList<'T>) =
         match myLst with
@@ -72,6 +67,4 @@ let sortMyList (myLst: MyList<'T>) =
         | iter when iter = myLst.Length -> myLst
         | _ -> cicle (iter + 1) (maxToTop myLst)
 
-    if myLst.Length = 1
-    then myLst
-    else cicle 0 myLst
+    cicle 1 myLst
