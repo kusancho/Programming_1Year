@@ -1,9 +1,5 @@
 namespace homework
 
-open System.IO
-open System
-open QuadTree
-open MyList
 
 module Main =
 
