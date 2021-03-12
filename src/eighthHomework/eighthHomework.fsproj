@@ -17,6 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="AlgebraicStructure.fs" />
     <Compile Include="QuadTree.fs" />
     <Compile Include="LongInt.fs" />
     <Compile Include="Main.fs" />
