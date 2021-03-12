@@ -119,15 +119,18 @@ type quadTree<'t when 't: equality> =
             | _ -> failwith "wrong parameters"
 
 
-    static member scalarMultiply (tree: quadTree<'t>) scalar multOp =
-        match tree with
-        | Node(a, b, c, d) ->
-            Node(quadTree.scalarMultiply a scalar multOp,
-                quadTree.scalarMultiply b scalar multOp,
-                quadTree.scalarMultiply c scalar multOp,
-                quadTree.scalarMultiply d scalar multOp)
-        | Leaf(a) -> Leaf(multOp scalar a)
-        | None -> None
+    static member scalarMultiply (tree: quadTree<'t>) scalar multOp neutral =
+        if scalar = neutral
+        then None
+        else
+            match tree with
+            | Node(a, b, c, d) ->
+                Node(quadTree.scalarMultiply a scalar multOp neutral,
+                    quadTree.scalarMultiply b scalar multOp neutral,
+                    quadTree.scalarMultiply c scalar multOp neutral,
+                    quadTree.scalarMultiply d scalar multOp neutral)
+            | Leaf(a) -> Leaf(multOp scalar a)
+            | None -> None
 
 
 type extendedTree<'t when 't: equality> =
@@ -250,14 +253,14 @@ type extendedTree<'t when 't: equality> =
 
 
     static member tensorMultiply  (fst: extendedTree<'t>) (snd: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
-        let monoid, multOp =
+        let neutral, multOp =
             match algStruct with
             | Monoid x -> failwith "we can't multiply in monoid"
-            | SemiRing x -> Monoid(x.Monoid), x.Mul
+            | SemiRing x -> x.Monoid.Neutral, x.Mul
         let rec go tree  =
             match tree with
             | Node(a, b, c, d) ->
                 Node(go a, go b, go c, go d)
-            | Leaf a -> quadTree.scalarMultiply snd.tree a multOp
+            | Leaf a -> quadTree.scalarMultiply snd.tree a multOp neutral
             | None -> None
         extendedTree(fst.lineSize * snd.lineSize, fst.colSize * snd.colSize, go fst.tree)

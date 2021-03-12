@@ -52,7 +52,7 @@ let testTree =
 
 
         testCase "scalarMultiply" <| fun _ ->
-            Expect.equal (quadTree.scalarMultiply sum 3 semiRing.Mul) (Node(Leaf 30, Leaf 30, Leaf 30, Leaf 30)) ""
+            Expect.equal (quadTree.scalarMultiply sum 3 semiRing.Mul semiRing.Monoid.Neutral) (Node(Leaf 30, Leaf 30, Leaf 30, Leaf 30)) ""
 
 
         testCase "align" <| fun _ ->
