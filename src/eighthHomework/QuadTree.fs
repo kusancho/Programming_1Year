@@ -235,9 +235,6 @@ type extendedTree<'t when 't: equality> =
                      (localSum (go c1 a2) (go d1 c2)),
                      (localSum (go c1 b2) (go d1 d2)))
             | Leaf(a), Leaf(b) -> Leaf(multOp a b)
-            | None, Leaf(_) -> None
-            | Leaf(_), None -> None
-            | None, None -> None
             | _, None -> None
             | None, _ -> None
             | _, _ -> failwith "error in multiplication, different depth"

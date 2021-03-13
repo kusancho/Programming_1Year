@@ -41,6 +41,13 @@ type MyList<'T> =
             func hd
             MyList.iter func tl
 
+    static member map2 func (fst: MyList<'t>) (snd: MyList<'t>) =
+        match fst, snd with
+        | Cons(a, b), Cons(c, d) ->
+        | Cons(a, b), Leaf c ->
+        | Cons
+
+
     static member ofList (lst: list<'T>) =
         match lst.Length with
         | 0 -> failwith "myList is nonEmpty list"
