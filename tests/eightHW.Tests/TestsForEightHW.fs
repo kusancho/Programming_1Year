@@ -13,9 +13,9 @@ let forReduce = Node(None, None, None, Leaf 1)
 let errorTree = Leaf(404)
 let monoid = Monoid(new Monoid<int>((+), 0))
 let semiRing = new SemiRing<int>(new Monoid<int>((+), 0), (*))
-let fstMultTree = extendedTree.createTreeOfSparseMatrix (SparseMatrix(1, 5, [Cell(0, 0, 1)]))       // trees for mupliply
+let fstMultTree = extendedTree.createTreeOfSparseMatrix (SparseMatrix(1, 5, [Cell(0, 0, 100)]))       // trees for mupliply
 let sndMultTree = extendedTree.createTreeOfSparseMatrix (SparseMatrix(5, 2, [Cell(0, 0, 3); Cell(0, 1, 3)]))
-let resMultTree = extendedTree.createTreeOfSparseMatrix (SparseMatrix(1, 2, [Cell(0, 0, 3); Cell(0, 1, 3)]))
+let resMultTree = extendedTree.createTreeOfSparseMatrix (SparseMatrix(1, 2, [Cell(0, 0, 300); Cell(0, 1, 300)]))
 
 
 [<Tests>]

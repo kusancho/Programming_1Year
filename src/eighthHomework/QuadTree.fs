@@ -98,7 +98,7 @@ type quadTree<'t when 't: equality> =
                 let first, second, third, fourth = go nw1 nw2, go ne1 ne2, go sw1 sw2, go se1 se2
                 if first = None && second = None && third = None && fourth = None
                 then None
-                else Node(go nw1 nw2, go ne1 ne2, go sw1 sw2, go se1 se2)
+                else Node(first, second, third, fourth)
             | _, _ -> failwith "sizes of tree aren't equal"
         go fstTree sndTree
 
@@ -230,14 +230,12 @@ type extendedTree<'t when 't: equality> =
         let rec go (fstTree: quadTree<'t>) (sndTree: quadTree<'t>) = // mult for equal tree
             match fstTree, sndTree with
             | Node(a1, b1, c1, d1), Node(a2, b2, c2, d2) ->
-                Node((localSum (go a1 a2) (go b1 c2)),
-                     (localSum (go a1 b2) (go b1 d2)),
-                     (localSum (go c1 a2) (go d1 c2)),
-                     (localSum (go c1 b2) (go d1 d2)))
+                let first, second = localSum (go a1 a2) (go b1 c2), localSum (go a1 b2) (go b1 d2)
+                let third, fourth = localSum (go c1 a2) (go d1 c2), localSum (go c1 b2) (go d1 d2)
+                if first = None && second = None && third = None && fourth = None
+                then None
+                else Node(first, second, third, fourth)
             | Leaf(a), Leaf(b) -> Leaf(multOp a b)
-            | None, Leaf(_) -> None
-            | Leaf(_), None -> None
-            | None, None -> None
             | _, None -> None
             | None, _ -> None
             | _, _ -> failwith "error in multiplication, different depth"
