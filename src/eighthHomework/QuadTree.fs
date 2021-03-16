@@ -262,3 +262,27 @@ type extendedTree<'t when 't: equality> =
             | Leaf a -> quadTree.scalarMultiply snd.tree a multOp neutral
             | None -> None
         extendedTree(fst.lineSize * snd.lineSize, fst.colSize * snd.colSize, go fst.tree)
+
+
+    static member private toBoolTree (exTree: extendedTree<'t>) =
+        let rec go tree =
+            match tree with
+            | Node(a, b, c, d) -> Node(go a, go b, go c, go d)
+            | Leaf a -> Leaf 1
+            | None -> None
+        extendedTree(exTree.lineSize, exTree.colSize, go exTree.tree)
+
+
+    static member transitiveClosure (exTree: extendedTree<'t>) =
+        let boolTree = extendedTree.toBoolTree exTree
+        let n = max exTree.lineSize exTree.colSize
+        let monoid = Monoid(new Monoid<int>((+), 0))
+        let semiRing = SemiRing(new SemiRing<int>(new Monoid<int>((+), 0), (*)))
+        let rec accumulate curr iter acc =
+            if iter = 0
+            then acc
+            else
+                let temp = extendedTree.multiply boolTree curr semiRing
+                accumulate temp (iter - 1) (acc @ [temp])
+        let lstOfMtx = accumulate boolTree n []
+        List.fold (fun acc x -> extendedTree.sumExTree acc x monoid) boolTree lstOfMtx

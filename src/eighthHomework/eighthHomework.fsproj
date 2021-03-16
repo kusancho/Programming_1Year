@@ -19,7 +19,10 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="AlgebraicStructure.fs" />
     <Compile Include="QuadTree.fs" />
+    <Content Include="out.dot" />
+    <Content Include="input.txt" />
     <Compile Include="LongInt.fs" />
+    <Compile Include="Output.fs" />
     <Compile Include="Main.fs" />
     <None Include="App.config" />
   </ItemGroup>
