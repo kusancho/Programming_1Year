@@ -1,24 +1,36 @@
 module Output
 
 
-open System.Collections.Generic
+open System
 open QuadTree
 open System.IO
-open System
+open SparseMatrix
 
 
-let readBoolMatrix path = // function borrowed from 6 HW
+let readToSparseMatrix path =
     let binStrings = File.ReadAllLines path
     let colSize = (binStrings.[0].Split [|' '; '\n'|] ).Length
     let listOfCells =
          [
           for i in 0 .. binStrings.Length - 1 do
               if (binStrings.[i].Split([|' '; '\n'|])).Length <> colSize then failwith "wrong matrix"
-              let chars = binStrings.[i].Split()
+              let subStrings = binStrings.[i].Split([|' '; '\n'|])
               for j in 0 .. colSize - 1 do
-                  if chars.[j] = string "1" then Cell(i, j, 1)
+                  Cell(i, j, subStrings.[j])
           ]
     SparseMatrix(binStrings.Length, (binStrings.[0].Split()).Length, listOfCells)
+
+
+/// arg: SparseMatrix<string> -> SparseMatrix<int>, using int <| string
+let toIntSparse (sparse: SparseMatrix<string>) =
+    SparseMatrix(sparse.lineSize, sparse.colSize,
+                 List.map ((fun (cell: Cell<string>) -> Cell(cell.line, cell.col, int cell.data))) sparse.content)
+
+
+let toBoolSparse (sparse: SparseMatrix<string>) =
+    let temp = toIntSparse sparse
+    SparseMatrix(temp.lineSize, temp.colSize, List.filter (fun cell -> cell.data <> 0) temp.content)
+
 
 let extTreeToDotAfterTrClosure outFile (exTree: extendedTree<int>) =
     let numberOfVertexes = max exTree.lineSize exTree.colSize

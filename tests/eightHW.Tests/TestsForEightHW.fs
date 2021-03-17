@@ -3,6 +3,7 @@ module TestsForEighthHW
 open Expecto
 open QuadTree
 open AlgebraicStructure
+open SparseMatrix
 
 
 //experimental trees
