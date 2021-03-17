@@ -66,7 +66,7 @@ type quadTree<'t when 't: equality> =
                     quadTree.scalarMultiply b scalar multOp neutral,
                     quadTree.scalarMultiply c scalar multOp neutral,
                     quadTree.scalarMultiply d scalar multOp neutral)
-            | Leaf(a) -> Leaf(multOp scalar a)
+            | Leaf(a) -> quadTree.createLeaf neutral (multOp scalar a)
             | None -> None
 
 
@@ -127,14 +127,18 @@ type extendedTree<'t when 't: equality> =
         else failwith "wrong sizes of exTree's"
 
 
-    static member createTreeOfSparseMatrix (sparseMatrix: SparseMatrix<'t>) =
+    static member createTreeOfSparseMatrix (algStruct: AlgebraicStruct<'t>) (sparseMatrix: SparseMatrix<'t>) =
+        let neutral =
+            match algStruct with
+            | Monoid x -> x.Neutral
+            | SemiRing x -> x.Monoid.Neutral
         let rec go lineBorder colBorder =
             if SparseMatrix.isEmptyInPlace sparseMatrix lineBorder colBorder
             then None
             else
                 match lineBorder, colBorder with
                 | (a, b), (c, _) when a = b ->  // coordinate of one Cell
-                    Leaf(SparseMatrix.getContent sparseMatrix a c)
+                    quadTree.createLeaf neutral <| SparseMatrix.getContent sparseMatrix a c
                 | (a, b), (c, d) ->
                     let lineHalf = a + (b - a) / 2
                     let colHalf = c + (d - c) / 2
@@ -147,13 +151,13 @@ type extendedTree<'t when 't: equality> =
         extendedTree(sparseMatrix.lineSize, sparseMatrix.colSize, (go (0, border - 1) (0, border - 1)))
 
 
-    static member alignTrees (fst: extendedTree<'t>) (snd: extendedTree<'t>) =
+    static member alignTrees (fst: extendedTree<'t>) (snd: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
         match fst.specSize, snd.specSize with
         | a, b when a > b ->
-            fst, extendedTree.createTreeOfSparseMatrix <|
+            fst, extendedTree.createTreeOfSparseMatrix algStruct <|
                        (SparseMatrix(fst.lineSize, fst.colSize, (extendedTree.toSparseMatrix snd).content))
         | _, _ ->
-            (extendedTree.createTreeOfSparseMatrix <|
+            (extendedTree.createTreeOfSparseMatrix algStruct <|
                        (SparseMatrix(snd.lineSize, snd.colSize, (extendedTree.toSparseMatrix fst).content))), snd
 
 
@@ -177,7 +181,7 @@ type extendedTree<'t when 't: equality> =
         let resSpecSize = getPowOfTwo <| max fst.lineSize snd.colSize
         if fst.specSize <> snd.specSize
         then
-             let fstLocalTree, sndLocalTree = extendedTree.alignTrees fst snd
+             let fstLocalTree, sndLocalTree = extendedTree.alignTrees fst snd algStruct
              let result = go fstLocalTree.tree sndLocalTree.tree
              extendedTree(fst.lineSize, snd.colSize, quadTree.reduce result resSpecSize fstLocalTree.specSize)
         else

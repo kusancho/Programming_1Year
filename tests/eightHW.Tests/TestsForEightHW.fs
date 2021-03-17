@@ -14,9 +14,9 @@ let forReduce = Node(None, None, None, Leaf 1)
 let errorTree = Leaf(404)
 let monoid = Monoid(new Monoid<int>((+), 0))
 let semiRing = new SemiRing<int>(new Monoid<int>((+), 0), (*))
-let fstMultTree = extendedTree.createTreeOfSparseMatrix (SparseMatrix(1, 5, [Cell(0, 0, 100)]))       // trees for mupliply
-let sndMultTree = extendedTree.createTreeOfSparseMatrix (SparseMatrix(5, 2, [Cell(0, 0, 3); Cell(0, 1, 3)]))
-let resMultTree = extendedTree.createTreeOfSparseMatrix (SparseMatrix(1, 2, [Cell(0, 0, 300); Cell(0, 1, 300)]))
+let fstMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 5, [Cell(0, 0, 100)]))       // trees for mupliply
+let sndMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(5, 2, [Cell(0, 0, 3); Cell(0, 1, 3)]))
+let resMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 2, [Cell(0, 0, 300); Cell(0, 1, 300)]))
 
 
 [<Tests>]
@@ -25,19 +25,19 @@ let testTree =
         testProperty "autoTests toTree/ofTree" <| fun x ->
             let size = (abs x) % 50 + 2
             let sparse = randomIntSparseMatrix size
-            let tree = extendedTree.createTreeOfSparseMatrix sparse
+            let tree = extendedTree.createTreeOfSparseMatrix monoid sparse
             let func (a, b, _) = a, b
             Expect.equal (List.sortBy func (SparseMatrix.toListOfCells sparse)) (List.sortBy func (SparseMatrix.toListOfCells <| extendedTree.toSparseMatrix tree))
 
 
         testCase "extreme case #1" <| fun _ ->
             let mtx = SparseMatrix(0, 0, [])
-            Expect.equal (extendedTree.createTreeOfSparseMatrix mtx).tree None ""
+            Expect.equal (extendedTree.createTreeOfSparseMatrix monoid mtx).tree None ""
 
 
         testCase "extreme case #2" <| fun _ ->
-            let mtx = SparseMatrix(1, 1, [Cell(0, 0, 3)])
-            Expect.equal (extendedTree.createTreeOfSparseMatrix mtx).tree (Leaf(3)) ""
+            let mtx = SparseMatrix(1, 1, [Cell(0, 0, 0)])
+            Expect.equal (extendedTree.createTreeOfSparseMatrix monoid mtx).tree None ""
 
 
         testCase "sum of Trees" <| fun _ ->
@@ -57,7 +57,7 @@ let testTree =
 
 
         testCase "align" <| fun _ ->
-            let fst, snd = extendedTree.alignTrees <| extendedTree(1, 1, errorTree) <| extendedTree(2, 2, sum)
+            let fst, snd = extendedTree.alignTrees (extendedTree(1, 1, errorTree)) (extendedTree(2, 2, sum)) monoid
             Expect.equal fst.tree (Node(Leaf 404, None, None, None)) ""
 
 
@@ -66,9 +66,9 @@ let testTree =
 
 
         testCase "tensorMultiply" <| fun _ ->
-            let fst = extendedTree.createTreeOfSparseMatrix (SparseMatrix(1, 1, [Cell(0, 0, 1)]))
-            let snd = extendedTree.createTreeOfSparseMatrix (SparseMatrix(2, 2, [Cell(0, 0, 10); Cell(1, 0, 10)]))
-            let res = extendedTree.createTreeOfSparseMatrix (SparseMatrix(2, 2, [Cell(0, 0, 10); Cell(1, 0, 10)]))
+            let fst = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 1, [Cell(0, 0, 1)]))
+            let snd = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(2, 2, [Cell(0, 0, 10); Cell(1, 0, 10)]))
+            let res = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(2, 2, [Cell(0, 0, 10); Cell(1, 0, 10)]))
             Expect.equal (extendedTree.tensorMultiply fst snd (SemiRing(semiRing))) res ""
              ]
 

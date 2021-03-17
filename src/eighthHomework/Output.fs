@@ -7,7 +7,7 @@ open System.IO
 open SparseMatrix
 
 
-let readToSparseMatrix path =
+let readToSparseMatrix path  =
     let binStrings = File.ReadAllLines path
     let colSize = (binStrings.[0].Split [|' '; '\n'|] ).Length
     let listOfCells =
@@ -29,7 +29,7 @@ let toIntSparse (sparse: SparseMatrix<string>) =
 
 let toBoolSparse (sparse: SparseMatrix<string>) =
     let temp = toIntSparse sparse
-    SparseMatrix(temp.lineSize, temp.colSize, List.filter (fun cell -> cell.data <> 0) temp.content)
+    SparseMatrix(temp.lineSize, temp.colSize, List.filter (fun cell -> cell.data <> 1) temp.content)
 
 
 let extTreeToDotAfterTrClosure outFile (exTree: extendedTree<int>) =
