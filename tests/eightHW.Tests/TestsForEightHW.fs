@@ -6,14 +6,64 @@ open AlgebraicStructure
 open SparseMatrix
 
 
+let genArrayBySparseMatrix (mtx: SparseMatrix<int>) =
+    let output = Array2D.zeroCreate mtx.lineSize mtx.colSize
+    for x in mtx.content do
+        output.[x.line, x.col] <- x.data
+    output
+
+
+let arrSum (x: int[,]) (y: int[,]) =
+    let a = Array2D.copy x
+    if Array2D.length1 x <> Array2D.length1 y || Array2D.length2 x <> Array2D.length2 y
+    then failwith "Dimensions of matrices should be equal"
+    else
+        for i in 0 .. Array2D.length1 x - 1 do
+            for j in 0 .. Array2D.length2 x - 1 do
+                a.[i, j] <- a.[i, j] + y.[i, j]
+    a
+
+
+let multiplyByScalar s (x:int[,]) =
+    let y = Array2D.copy x
+    for i in 0 .. Array2D.length1 x - 1 do
+        for j in 0 .. Array2D.length2 x - 1 do
+            y.[i, j] <- s * y.[i, j]
+    y
+
+let tensor (m1: int[,]) (m2: int[,]) =
+    let rows = m1.GetLength 0 * m2.GetLength 0
+    let columns = m1.GetLength 1 * m2.GetLength 1
+    let res = Array2D.zeroCreate rows columns
+    for i in 0..rows - 1 do
+        for j in 0..columns - 1 do
+            res.[i,j] <- m1.[i / m2.GetLength 0, j / m2.GetLength 1 ] * m2.[i % m2.GetLength 0, j % m2.GetLength 0]
+    res
+
+
+let matrixMultiply (matrix1: int[,]) (matrix2: int[,]) =
+    let row1 = matrix1.[0, *].Length
+    let col2 = matrix2.[*, 0].Length
+    let result = Array2D.zeroCreate row1 col2
+    if row1 = col2
+    then
+        for i = 0 to row1 - 1 do
+            for k = 0 to col2 - 1 do
+                for r = 0 to row1 - 1 do
+                        result.[i,k] <- result.[i,k] + matrix1.[i,r] * matrix2.[r,k]
+        result
+    else failwith "wrong matrices"
+
+
 //experimental trees
-let fst = Node(Leaf(3),  None,      Leaf(10),  None)        // TREES FOR SUM
-let snd = Node(Leaf(7),  Leaf(10),  None,      Leaf(10))
-let sum = Node(Leaf(10), Leaf(10),  Leaf(10),  Leaf(10))
+let fst = Node(Leaf(-7),  Leaf(-10),   Leaf(10),    Leaf(-10))        // TREES FOR SUM
+let snd = Node(Leaf(7),   Leaf(10),    Leaf(-10),   Leaf(10))
+let sum = None
 let forReduce = Node(None, None, None, Leaf 1)
 let errorTree = Leaf(404)
 let monoid = Monoid(new Monoid<int>((+), 0))
 let semiRing = new SemiRing<int>(new Monoid<int>((+), 0), (*))
+let semiRingAlg = SemiRing (new SemiRing<int>(new Monoid<int>((+), 0), (*)))
 let fstMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 5, [Cell(0, 0, 100)]))       // trees for mupliply
 let sndMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(5, 2, [Cell(0, 0, 3); Cell(0, 1, 3)]))
 let resMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 2, [Cell(0, 0, 300); Cell(0, 1, 300)]))
@@ -23,15 +73,46 @@ let resMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 
 let testTree =
     testList "Trees functions" [
         testProperty "autoTests toTree/ofTree" <| fun x ->
-            let size = (abs x) % 50 + 2
+            let size = (abs x) % 100 + 2
             let sparse = randomIntSparseMatrix size
             let tree = extendedTree.createTreeOfSparseMatrix monoid sparse
-            let func (a, b, _) = a, b
-            Expect.equal (List.sortBy func (SparseMatrix.toListOfCells sparse)) (List.sortBy func (SparseMatrix.toListOfCells <| extendedTree.toSparseMatrix tree))
+            let arr = genArrayBySparseMatrix sparse
+            Expect.equal (genArrayBySparseMatrix <| extendedTree.toSparseMatrix tree) arr " "
+
+        testProperty "autoTests tensorMultiply" <| fun x ->
+            let size = (abs x) % 10 + 5
+            let fSparse, sSparse = (randomIntSparseMatrix size), (randomIntSparseMatrix size)
+            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
+            let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
+            let multArr = tensor fArr sArr
+            let sparseTens = genArrayBySparseMatrix (extendedTree.toMatrix <| extendedTree.tensorMultiply fTree sTree semiRingAlg)
+            Expect.equal (sparseTens) multArr ""
+
+        testProperty "autoTests sum" <| fun x ->
+            let size = (abs x) % 50 + 2
+            let fSparse, sSparse = (randomIntSparseMatrix size), (randomIntSparseMatrix size)
+            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
+            let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
+            let sumArr = arrSum fArr sArr
+            let sparseSum = extendedTree.toSparseMatrix <| extendedTree.sumExTree fTree sTree monoid
+            Expect.equal (genArrayBySparseMatrix sparseSum) sumArr
+
+
+        testProperty "autoTests multiply" <| fun x ->
+            let size = (abs x) % 50 + 2
+            let fSparse, sSparse = (randomIntSparseMatrix size), (randomIntSparseMatrix size)
+            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
+            let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
+            let multArr = matrixMultiply fArr sArr
+            let sparseMult = extendedTree.toSparseMatrix <| extendedTree.multiply fTree sTree semiRingAlg
+            Expect.equal (genArrayBySparseMatrix sparseMult) multArr
+
+
+
 
 
         testCase "extreme case #1" <| fun _ ->
-            let mtx = SparseMatrix(0, 0, [])
+            let mtx = SparseMatrix(1, 5, [])
             Expect.equal (extendedTree.createTreeOfSparseMatrix monoid mtx).tree None ""
 
 
@@ -52,8 +133,12 @@ let testTree =
             Expect.equal (quadTree.reduce forReduce 1 2) (Leaf 1) ""
 
 
-        testCase "scalarMultiply" <| fun _ ->
-            Expect.equal (quadTree.scalarMultiply sum 3 semiRing.Mul semiRing.Monoid.Neutral) (Node(Leaf 30, Leaf 30, Leaf 30, Leaf 30)) ""
+        testCase "scalarMultiply #1" <| fun _ ->
+            Expect.equal (quadTree.scalarMultiply fst 0 semiRing.Mul semiRing.Monoid.Neutral) None ""
+
+
+        testCase "scalarMultiply #2" <| fun _ ->
+            Expect.equal (quadTree.scalarMultiply fst -2 semiRing.Mul semiRing.Monoid.Neutral) (Node(Leaf(14),  Leaf(20),      Leaf(-20),  Leaf(20)))  ""
 
 
         testCase "align" <| fun _ ->
