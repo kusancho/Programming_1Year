@@ -6,6 +6,7 @@ open QuadTree
 open Output
 open AlgebraicStructure
 
+
 module Main =
 
     [<EntryPoint>]

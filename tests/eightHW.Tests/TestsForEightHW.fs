@@ -31,25 +31,29 @@ let multiplyByScalar s (x:int[,]) =
             y.[i, j] <- s * y.[i, j]
     y
 
-let tensor (m1: int[,]) (m2: int[,]) =
-    let rows = m1.GetLength 0 * m2.GetLength 0
-    let columns = m1.GetLength 1 * m2.GetLength 1
-    let res = Array2D.zeroCreate rows columns
-    for i in 0..rows - 1 do
-        for j in 0..columns - 1 do
-            res.[i,j] <- m1.[i / m2.GetLength 0, j / m2.GetLength 1 ] * m2.[i % m2.GetLength 0, j % m2.GetLength 0]
+let tensor (x1: SparseMatrix<int>) (y1: SparseMatrix<int>) =
+    let x = genArrayBySparseMatrix x1
+    let y = genArrayBySparseMatrix y1
+    let rowsX, rowsY = x.[0, *].Length, y.[0, *].Length
+    let colsX, colsY = x.[*, 0].Length, y.[*, 0].Length
+    let rows, cols = rowsX * rowsY, colsX * colsY
+    let res = Array2D.zeroCreate rows cols
+    for i in 0 .. (rows - 1) do
+        for j in 0 .. (cols - 1) do
+            res.[i, j] <- x.[i / rowsY, j / colsY] * y.[i % rowsY, j % rowsY]
     res
 
 
 let matrixMultiply (matrix1: int[,]) (matrix2: int[,]) =
-    let row1 = matrix1.[0, *].Length
-    let col2 = matrix2.[*, 0].Length
+    let row1 = matrix1.GetLength 0
+    let col1 = matrix1.GetLength 1
+    let col2 = matrix2.GetLength 1
     let result = Array2D.zeroCreate row1 col2
     if row1 = col2
     then
-        for i = 0 to row1 - 1 do
-            for k = 0 to col2 - 1 do
-                for r = 0 to row1 - 1 do
+        for i in 0 .. row1 - 1 do
+            for k in 0 .. col2 - 1 do
+                for r in 0 .. col1 - 1 do
                         result.[i,k] <- result.[i,k] + matrix1.[i,r] * matrix2.[r,k]
         result
     else failwith "wrong matrices"
@@ -72,25 +76,30 @@ let resMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 
 [<Tests>]
 let testTree =
     testList "Trees functions" [
-        testProperty "autoTests toTree/ofTree" <| fun x ->
-            let size = (abs x) % 100 + 2
-            let sparse = randomIntSparseMatrix size
+
+        testProperty "autoTests toTree/ofTree" <| fun (x: int) ->
+            let size = (abs x) % 50 + 2
+            let sparse = randomIntSparseMatrix (size + 10) size
             let tree = extendedTree.createTreeOfSparseMatrix monoid sparse
             let arr = genArrayBySparseMatrix sparse
             Expect.equal (genArrayBySparseMatrix <| extendedTree.toSparseMatrix tree) arr " "
 
-        testProperty "autoTests tensorMultiply" <| fun x ->
-            let size = (abs x) % 10 + 5
-            let fSparse, sSparse = (randomIntSparseMatrix size), (randomIntSparseMatrix size)
-            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
-            let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
-            let multArr = tensor fArr sArr
-            let sparseTens = genArrayBySparseMatrix (extendedTree.toMatrix <| extendedTree.tensorMultiply fTree sTree semiRingAlg)
-            Expect.equal (sparseTens) multArr ""
 
-        testProperty "autoTests sum" <| fun x ->
+        testProperty "autoTests tensorMultiply" <| fun (x1: int) (x2: int)  ->
+            let fst = getPowOfTwo <| abs(x1 % 20) + 5
+            let snd = getPowOfTwo <| abs(x2 % 30) + 5
+            let mtx1 = randomIntSparseMatrix (fst) (fst)
+            let mtx2 = randomIntSparseMatrix snd  snd
+            Expect.equal
+                (tensor mtx1 mtx2)
+                (genArrayBySparseMatrix
+                (extendedTree.toSparseMatrix
+                (extendedTree.tensorMultiply (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx1) (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx2) semiRingAlg))) ""
+
+
+        testProperty "autoTests sum" <| fun (x: int) ->
             let size = (abs x) % 50 + 2
-            let fSparse, sSparse = (randomIntSparseMatrix size), (randomIntSparseMatrix size)
+            let fSparse, sSparse = (randomIntSparseMatrix size size), (randomIntSparseMatrix size size)
             let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
             let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
             let sumArr = arrSum fArr sArr
@@ -98,17 +107,15 @@ let testTree =
             Expect.equal (genArrayBySparseMatrix sparseSum) sumArr
 
 
-        testProperty "autoTests multiply" <| fun x ->
-            let size = (abs x) % 50 + 2
-            let fSparse, sSparse = (randomIntSparseMatrix size), (randomIntSparseMatrix size)
+        testProperty "autoTests multiply" <| fun (x: int) (y: int) ->
+            let size1 = (abs x) % 50 + 2
+            let size2 = (abs y) % 20 + 2
+            let fSparse, sSparse = (randomIntSparseMatrix size1 size2), (randomIntSparseMatrix size2 size1)
             let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
             let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
             let multArr = matrixMultiply fArr sArr
             let sparseMult = extendedTree.toSparseMatrix <| extendedTree.multiply fTree sTree semiRingAlg
             Expect.equal (genArrayBySparseMatrix sparseMult) multArr
-
-
-
 
 
         testCase "extreme case #1" <| fun _ ->

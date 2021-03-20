@@ -63,12 +63,15 @@ type SparseMatrix<'t when 't: equality> =
         else failwith "element doesn't exist"
 
 
-let randomIntSparseMatrix size =
-    let rnd = Random()
-    let temp = Array2D.init size size (fun _ _ -> rnd.Next(0, 2))
-    let arr = Array2D.map (fun x -> if x > 0 then Random().Next(1, 1000) else x) temp
-    let listOfCells = [for i in 0 .. (arr.GetLength 0) - 1 do
-                           for j in 0 .. (arr.GetLength 1) - 1 do
-                               if arr.[i, j] <> 0 then Cell(i, j, arr.[i, j])
-                               ]
-    SparseMatrix(arr.GetLength 0, arr.GetLength 1, listOfCells)
+let randomIntSparseMatrix l c =
+    if l = 0 || c = 0
+    then failwith "wrong parameters"
+    else
+        let rnd = Random()
+        let temp = Array2D.init l c (fun _ _ -> rnd.Next(0, 2))
+        let arr = Array2D.map (fun x -> if x > 0 then Random().Next(1, 100) else x) temp
+        let listOfCells = [for i in 0 .. l - 1 do
+                               for j in 0 .. c - 1 do
+                                   if arr.[i, j] <> 0 then Cell(i, j, arr.[i, j])
+                                   ]
+        SparseMatrix(l, c, listOfCells)

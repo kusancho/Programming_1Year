@@ -10,17 +10,12 @@ type quadTree<'t when 't: equality> =
     | Leaf of 't
     | None
 
-
-    static member createNode (a: quadTree<'t>) (b: quadTree<'t>) (c: quadTree<'t>) (d: quadTree<'t>) =
-        if a = None && b = None && c = None && d = None
-        then None
-        else Node(a, b, c, d)
-
-
-    static member createLeaf (neutral: 't) (a: 't) =
-        if neutral = a
-        then None
-        else Leaf(a)
+    static member noneCheck neutral (tree: quadTree<'t>) =
+        match tree with
+        | None -> None
+        | Node(None, None, None, None) -> None
+        | Leaf a when a = neutral -> None
+        | a -> a
 
 
     static member sum (fstTree: quadTree<'t>) (sndTree: quadTree<'t>) (algebraStruct: AlgebraicStruct<'t>) =
@@ -32,16 +27,16 @@ type quadTree<'t when 't: equality> =
             match fst, snd with
             | None, a -> a
             | a, None -> a
-            | Leaf a, Leaf b ->
-                            quadTree.createLeaf neutral (sumOp a b)
+            | Leaf a, Leaf b -> quadTree.noneCheck neutral <| Leaf(sumOp a b)
             | Node(nw1, ne1, sw1, se1), Node(nw2, ne2, sw2, se2) ->
-                quadTree.createNode (go nw1 nw2) (go ne1 ne2) (go sw1 sw2) (go se1 se2)
+                quadTree.noneCheck neutral <| Node((go nw1 nw2), (go ne1 ne2), (go sw1 sw2), (go se1 se2))
             | _, _ -> failwith "sizes of tree aren't equal"
         go fstTree sndTree
 
 
     static member reduce (tree:quadTree<'t>) need current =
-        if need = current
+        if current < need then failwith "reduce"
+        elif need = current
         then tree
         else
             match tree with
@@ -53,6 +48,8 @@ type quadTree<'t when 't: equality> =
                 quadTree.reduce a need (current / 2)
             | Node(None, None, None, a) ->
                 quadTree.reduce a need (current / 2)
+            | Leaf a -> Leaf(a)
+            | None -> None
             | _ -> failwith "wrong parameters"
 
 
@@ -62,11 +59,11 @@ type quadTree<'t when 't: equality> =
         else
             match tree with
             | Node(a, b, c, d) ->
-                Node(quadTree.scalarMultiply a scalar multOp neutral,
+                quadTree.noneCheck neutral <| Node(quadTree.scalarMultiply a scalar multOp neutral,
                     quadTree.scalarMultiply b scalar multOp neutral,
                     quadTree.scalarMultiply c scalar multOp neutral,
                     quadTree.scalarMultiply d scalar multOp neutral)
-            | Leaf(a) -> quadTree.createLeaf neutral (multOp scalar a)
+            | Leaf(a) -> Leaf(multOp scalar a)
             | None -> None
 
 
@@ -137,15 +134,15 @@ type extendedTree<'t when 't: equality> =
             then None
             else
                 match lineBorder, colBorder with
-                | (a, b), (c, _) when a = b ->  // coordinate of one Cell
-                    quadTree.createLeaf neutral <| SparseMatrix.getContent sparseMatrix a c
+                | (a, b), (c, d) when a = b ->  // coordinate of one Cell
+                    quadTree.noneCheck neutral <| Leaf(SparseMatrix.getContent sparseMatrix a c)
                 | (a, b), (c, d) ->
                     let lineHalf = a + (b - a) / 2
                     let colHalf = c + (d - c) / 2
-                    Node((go (a, lineHalf) (c, colHalf)),          //NW
-                         (go (a, lineHalf) (colHalf + 1, d)),      //NE
-                         (go (lineHalf + 1, b) (c, colHalf)),      //SW
-                         (go (lineHalf + 1, b) (colHalf + 1, d)))  //SE
+                    quadTree.noneCheck neutral <| Node((go (a, lineHalf) (c, colHalf)),   //NW
+                         (go (a, lineHalf) (colHalf + 1, d)),                             //NE
+                         (go (lineHalf + 1, b) (c, colHalf)),                             //SW
+                         (go (lineHalf + 1, b) (colHalf + 1, d)))                         //SE
 
         let border = sparseMatrix.specSize
         extendedTree(sparseMatrix.lineSize, sparseMatrix.colSize, (go (0, border - 1) (0, border - 1)))
@@ -172,11 +169,11 @@ type extendedTree<'t when 't: equality> =
         let rec go (fstTree: quadTree<'t>) (sndTree: quadTree<'t>) = // mult for equal tree
             match fstTree, sndTree with
             | Node(a1, b1, c1, d1), Node(a2, b2, c2, d2) ->
-                quadTree.createNode (localSum (go a1 a2) (go b1 c2)) (localSum (go a1 b2) (go b1 d2))
-                                    (localSum (go c1 a2) (go d1 c2)) (localSum (go c1 b2) (go d1 d2))
+                quadTree.noneCheck neutral <| Node((localSum (go a1 a2) (go b1 c2)), (localSum (go a1 b2) (go b1 d2)),
+                                    (localSum (go c1 a2) (go d1 c2)), (localSum (go c1 b2) (go d1 d2)))
             | _, None -> None
             | None, _ -> None
-            | Leaf(a), Leaf(b) -> quadTree.createLeaf neutral <| multOp a b
+            | Leaf(a), Leaf(b) -> quadTree.noneCheck neutral <| Leaf(multOp a b)
             | _, _ -> failwith "error in multiplication, different depth"
         let resSpecSize = getPowOfTwo <| max fst.lineSize snd.colSize
         if fst.specSize <> snd.specSize
@@ -197,10 +194,10 @@ type extendedTree<'t when 't: equality> =
         let rec go tree  =
             match tree with
             | Node(a, b, c, d) ->
-                Node(go a, go b, go c, go d)
-            | Leaf a -> quadTree.scalarMultiply snd.tree a multOp neutral
+                quadTree.noneCheck neutral <| Node((go a), (go b), (go c), (go d))
+            | Leaf a -> quadTree.noneCheck neutral <| quadTree.scalarMultiply snd.tree a multOp neutral
             | None -> None
-        extendedTree(fst.lineSize * snd.lineSize, fst.colSize * snd.colSize, go fst.tree)
+        extendedTree(fst.lineSize * snd.colSize, fst.colSize * snd.colSize, go fst.tree)
 
 
     static member private toBoolTree (exTree: extendedTree<'t>) =
