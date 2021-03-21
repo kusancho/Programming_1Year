@@ -17,9 +17,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="SparseMatrix.fs" />
     <Compile Include="AlgebraicStructure.fs" />
     <Compile Include="QuadTree.fs" />
-    <Compile Include="LongInt.fs" />
+    <Content Include="out.dot" />
+    <Content Include="input.txt" />
+    <Compile Include="Output.fs" />
     <Compile Include="Main.fs" />
     <None Include="App.config" />
   </ItemGroup>

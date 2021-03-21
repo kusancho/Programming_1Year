@@ -1,83 +1,21 @@
 module QuadTree
 
 
-open System
 open AlgebraicStructure
-
-
-let getPowOfTwo number =   // out: smallest int 2^x, such that number <= 2^x
-    let mutable aproxNum = 1
-    while number > aproxNum do
-        aproxNum <- aproxNum * 2
-    aproxNum
-
-
-type Cell<'t when 't: equality> =
-    val line: int
-    val col: int
-    val data: 't
-    new(line, col, data) = {
-        line = line
-        col = col
-        data = data
-    }
-
-
-type SparseMatrix<'t when 't: equality> =
-    val lineSize: int
-    val colSize: int
-    val specSize: int
-    val content: list<Cell<'t>>
-    new(line, col, content) = {
-        lineSize = line
-        colSize = col
-        specSize = getPowOfTwo <| max line col
-        content = content
-    }
-
-
-    static member toListOfCells (mtx: SparseMatrix<'t>) =
-        List.map (fun (cell: Cell<'t>) -> (cell.line, cell.col, cell.data)) mtx.content
-
-
-    static member isEmptyInPlace (sparseMatrix: SparseMatrix<'t>) lineBorders colBorders =
-        let tempFun acc (cell: Cell<'t>)  =
-            let line, col = cell.line, cell.col
-            match lineBorders, colBorders with
-            | (a, b), (c, d) when line <= b && line >= a && col <= d && col >= c -> false
-            | _ -> acc
-        List.fold tempFun true sparseMatrix.content
-
-
-    static member getContent (sparseMatrix: SparseMatrix<'t>) line col =
-        let mutable flag = false
-        let mutable a = sparseMatrix.content.Head
-        for item in sparseMatrix.content do
-            let lineC = item.line
-            let colC = item.col
-            if line = lineC && col = colC
-            then
-                flag <- true
-                a <- item
-        if flag then a.data
-        else failwith "element doesn't exist"
-
-
-let randomIntSparseMatrix size =
-    let rnd = Random()
-    let temp = Array2D.init size size (fun _ _ -> rnd.Next(0, 2))
-    let arr = Array2D.map (fun x -> if x > 0 then Random().Next(1, 1000) else x) temp
-    let listOfCells = [for i in 0 .. (arr.GetLength 0) - 1 do
-                           for j in 0 .. (arr.GetLength 1) - 1 do
-                               if arr.[i, j] <> 0 then Cell(i, j, arr.[i, j])
-                               ]
-    SparseMatrix(arr.GetLength 0, arr.GetLength 1, listOfCells)
+open SparseMatrix
 
 
 type quadTree<'t when 't: equality> =
     | Node of quadTree<'t> * quadTree<'t> * quadTree<'t> * quadTree<'t>
     | Leaf of 't
     | None
+
+    static member noneCheck neutral (tree: quadTree<'t>) =
+        match tree with
+        | None -> None
+        | Node(None, None, None, None) -> None
+        | Leaf a when a = neutral -> None
+        | a -> a
 
 
     static member sum (fstTree: quadTree<'t>) (sndTree: quadTree<'t>) (algebraStruct: AlgebraicStruct<'t>) =
@@ -87,24 +25,18 @@ type quadTree<'t when 't: equality> =
             | SemiRing x -> x.Monoid.Sum, x.Monoid.Neutral
         let rec go fst snd =
             match fst, snd with
-            | Leaf a, Leaf b ->
-                let res = sumOp a b
-                if res = neutral
-                then None
-                else Leaf res
             | None, a -> a
             | a, None -> a
+            | Leaf a, Leaf b -> quadTree.noneCheck neutral <| Leaf(sumOp a b)
             | Node(nw1, ne1, sw1, se1), Node(nw2, ne2, sw2, se2) ->
-                let first, second, third, fourth = go nw1 nw2, go ne1 ne2, go sw1 sw2, go se1 se2
-                if first = None && second = None && third = None && fourth = None
-                then None
-                else Node(go nw1 nw2, go ne1 ne2, go sw1 sw2, go se1 se2)
+                quadTree.noneCheck neutral <| Node((go nw1 nw2), (go ne1 ne2), (go sw1 sw2), (go se1 se2))
             | _, _ -> failwith "sizes of tree aren't equal"
         go fstTree sndTree
 
 
     static member reduce (tree:quadTree<'t>) need current =
-        if need = current
+        if current < need then failwith "reduce"
+        elif need = current
         then tree
         else
             match tree with
@@ -116,6 +48,8 @@ type quadTree<'t when 't: equality> =
                 quadTree.reduce a need (current / 2)
             | Node(None, None, None, a) ->
                 quadTree.reduce a need (current / 2)
+            | Leaf a -> Leaf(a)
+            | None -> None
             | _ -> failwith "wrong parameters"
 
 
@@ -125,7 +59,7 @@ type quadTree<'t when 't: equality> =
         else
             match tree with
             | Node(a, b, c, d) ->
-                Node(quadTree.scalarMultiply a scalar multOp neutral,
+                quadTree.noneCheck neutral <| Node(quadTree.scalarMultiply a scalar multOp neutral,
                     quadTree.scalarMultiply b scalar multOp neutral,
                     quadTree.scalarMultiply c scalar multOp neutral,
                     quadTree.scalarMultiply d scalar multOp neutral)
@@ -148,6 +82,7 @@ type extendedTree<'t when 't: equality> =
 
     override this.GetHashCode() =
         hash (this.lineSize, this.colSize, this.tree)
+
 
     override this.Equals(t) =
         match t with
@@ -189,59 +124,61 @@ type extendedTree<'t when 't: equality> =
         else failwith "wrong sizes of exTree's"
 
 
-    static member createTreeOfSparseMatrix (sparseMatrix: SparseMatrix<'t>) =
+    static member createTreeOfSparseMatrix (algStruct: AlgebraicStruct<'t>) (sparseMatrix: SparseMatrix<'t>) =
+        let neutral =
+            match algStruct with
+            | Monoid x -> x.Neutral
+            | SemiRing x -> x.Monoid.Neutral
         let rec go lineBorder colBorder =
             if SparseMatrix.isEmptyInPlace sparseMatrix lineBorder colBorder
             then None
             else
                 match lineBorder, colBorder with
-                | (a, b), (c, _) when a = b ->  // coordinate of one Cell
-                    Leaf(SparseMatrix.getContent sparseMatrix a c)
+                | (a, b), (c, d) when a = b ->  // coordinate of one Cell
+                    quadTree.noneCheck neutral <| Leaf(SparseMatrix.getContent sparseMatrix a c)
                 | (a, b), (c, d) ->
                     let lineHalf = a + (b - a) / 2
                     let colHalf = c + (d - c) / 2
-                    Node((go (a, lineHalf) (c, colHalf)),          //NW
-                         (go (a, lineHalf) (colHalf + 1, d)),      //NE
-                         (go (lineHalf + 1, b) (c, colHalf)),      //SW
-                         (go (lineHalf + 1, b) (colHalf + 1, d)))  //SE
+                    quadTree.noneCheck neutral <| Node((go (a, lineHalf) (c, colHalf)),   //NW
+                         (go (a, lineHalf) (colHalf + 1, d)),                             //NE
+                         (go (lineHalf + 1, b) (c, colHalf)),                             //SW
+                         (go (lineHalf + 1, b) (colHalf + 1, d)))                         //SE
 
         let border = sparseMatrix.specSize
         extendedTree(sparseMatrix.lineSize, sparseMatrix.colSize, (go (0, border - 1) (0, border - 1)))
 
 
-    static member alignTrees (fst: extendedTree<'t>) (snd: extendedTree<'t>) =
+    static member alignTrees (fst: extendedTree<'t>) (snd: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
         match fst.specSize, snd.specSize with
         | a, b when a > b ->
-            fst, extendedTree.createTreeOfSparseMatrix <|
+            fst, extendedTree.createTreeOfSparseMatrix algStruct <|
                        (SparseMatrix(fst.lineSize, fst.colSize, (extendedTree.toSparseMatrix snd).content))
         | _, _ ->
-            (extendedTree.createTreeOfSparseMatrix <|
+            (extendedTree.createTreeOfSparseMatrix algStruct <|
                        (SparseMatrix(snd.lineSize, snd.colSize, (extendedTree.toSparseMatrix fst).content))), snd
 
 
     static member multiply (fst: extendedTree<'t>) (snd: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
         if fst.colSize <> snd.lineSize
         then failwith "wrong sizes of trees (can't multiply)"
-        let monoid, multOp =
+        let monoid, multOp, neutral =
             match algStruct with
             | Monoid x -> failwith "we can't multiply in monoid"
-            | SemiRing x -> Monoid(x.Monoid), x.Mul
+            | SemiRing x -> Monoid(x.Monoid), x.Mul, x.Monoid.Neutral
         let localSum a b = quadTree.sum a b monoid // sum trees in monoid
         let rec go (fstTree: quadTree<'t>) (sndTree: quadTree<'t>) = // mult for equal tree
             match fstTree, sndTree with
             | Node(a1, b1, c1, d1), Node(a2, b2, c2, d2) ->
-                Node((localSum (go a1 a2) (go b1 c2)),
-                     (localSum (go a1 b2) (go b1 d2)),
-                     (localSum (go c1 a2) (go d1 c2)),
-                     (localSum (go c1 b2) (go d1 d2)))
-            | Leaf(a), Leaf(b) -> Leaf(multOp a b)
+                quadTree.noneCheck neutral <| Node((localSum (go a1 a2) (go b1 c2)), (localSum (go a1 b2) (go b1 d2)),
+                                    (localSum (go c1 a2) (go d1 c2)), (localSum (go c1 b2) (go d1 d2)))
             | _, None -> None
             | None, _ -> None
+            | Leaf(a), Leaf(b) -> quadTree.noneCheck neutral <| Leaf(multOp a b)
             | _, _ -> failwith "error in multiplication, different depth"
         let resSpecSize = getPowOfTwo <| max fst.lineSize snd.colSize
         if fst.specSize <> snd.specSize
         then
-             let fstLocalTree, sndLocalTree = extendedTree.alignTrees fst snd
+             let fstLocalTree, sndLocalTree = extendedTree.alignTrees fst snd algStruct
              let result = go fstLocalTree.tree sndLocalTree.tree
              extendedTree(fst.lineSize, snd.colSize, quadTree.reduce result resSpecSize fstLocalTree.specSize)
         else
@@ -257,7 +194,31 @@ type extendedTree<'t when 't: equality> =
         let rec go tree  =
             match tree with
             | Node(a, b, c, d) ->
-                Node(go a, go b, go c, go d)
-            | Leaf a -> quadTree.scalarMultiply snd.tree a multOp neutral
+                quadTree.noneCheck neutral <| Node((go a), (go b), (go c), (go d))
+            | Leaf a -> quadTree.noneCheck neutral <| quadTree.scalarMultiply snd.tree a multOp neutral
             | None -> None
-        extendedTree(fst.lineSize * snd.lineSize, fst.colSize * snd.colSize, go fst.tree)
+        extendedTree(fst.lineSize * snd.colSize, fst.colSize * snd.colSize, go fst.tree)
+
+
+    static member private toBoolTree (exTree: extendedTree<'t>) =
+        let rec go tree =
+            match tree with
+            | Node(a, b, c, d) -> Node(go a, go b, go c, go d)
+            | Leaf a -> Leaf 1
+            | None -> None
+        extendedTree(exTree.lineSize, exTree.colSize, go exTree.tree)
+
+
+    static member transitiveClosure (exTree: extendedTree<'t>) =
+        let boolTree = extendedTree.toBoolTree exTree
+        let n = max exTree.lineSize exTree.colSize
+        let monoid = Monoid(new Monoid<int>((+), 0))
+        let semiRing = SemiRing(new SemiRing<int>(new Monoid<int>((+), 0), (*)))
+        let rec accumulate curr iter acc =
+            if iter = 0
+            then acc
+            else
+                let temp = extendedTree.multiply boolTree curr semiRing
+                accumulate temp (iter - 1) (acc @ [temp])
+        let lstOfMtx = accumulate boolTree n []
+        List.fold (fun acc x -> extendedTree.sumExTree acc x monoid) boolTree lstOfMtx
