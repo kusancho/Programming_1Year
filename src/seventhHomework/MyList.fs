@@ -1,5 +1,7 @@
 module MyList
 
+open System
+
 type MyList<'T> =
     | Last of 'T
     | Cons of 'T * MyList<'T>
