@@ -209,16 +209,17 @@ type extendedTree<'t when 't: equality> =
         extendedTree(exTree.lineSize, exTree.colSize, go exTree.tree)
 
 
-    static member transitiveClosure (exTree: extendedTree<'t>) =
-        let boolTree = extendedTree.toBoolTree exTree
+    static member transitiveClosure (exTree: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
+        let monoid, semiRing =
+            match algStruct with
+            | Monoid x -> failwith "can't multiply in monoid"
+            | SemiRing x -> Monoid x.Monoid, SemiRing x
         let n = max exTree.lineSize exTree.colSize
-        let monoid = Monoid(new Monoid<int>((+), 0))
-        let semiRing = SemiRing(new SemiRing<int>(new Monoid<int>((+), 0), (*)))
         let rec accumulate curr iter acc =
             if iter = 0
             then acc
             else
-                let temp = extendedTree.multiply boolTree curr semiRing
+                let temp = extendedTree.multiply exTree curr semiRing
                 accumulate temp (iter - 1) (acc @ [temp])
-        let lstOfMtx = accumulate boolTree n []
-        List.fold (fun acc x -> extendedTree.sumExTree acc x monoid) boolTree lstOfMtx
+        let lstOfMtx = accumulate exTree n []
+        List.fold (fun acc x -> extendedTree.sumExTree acc x monoid) exTree lstOfMtx
