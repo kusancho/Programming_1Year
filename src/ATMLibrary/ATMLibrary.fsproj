@@ -20,8 +20,10 @@
     <Compile Include="AutomataOLD.fs" />
     <Compile Include="Automata.fs" />
     <Compile Include="RegExp.fs" />
+    <Compile Include="Matrices.fs" />
+    <Compile Include="Automata.fs" />
+    <Compile Include="MatrixNFA.fs" />
     <Compile Include="Main.fs" />
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />

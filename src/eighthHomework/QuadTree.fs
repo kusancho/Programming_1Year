@@ -204,7 +204,7 @@ type extendedTree<'t when 't: equality> =
         let rec go tree =
             match tree with
             | Node(a, b, c, d) -> Node(go a, go b, go c, go d)
-            | Leaf a -> Leaf 1
+            | Leaf a -> Leaf true
             | None -> None
         extendedTree(exTree.lineSize, exTree.colSize, go exTree.tree)
 
