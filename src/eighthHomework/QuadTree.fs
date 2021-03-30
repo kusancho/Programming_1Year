@@ -186,7 +186,6 @@ type extendedTree<'t when 't: equality> =
             extendedTree(fst.lineSize, snd.colSize, quadTree.reduce result resSpecSize fst.specSize)
 
 
-   // need to fix it
     static member tensorMultiply  (fst: extendedTree<'t>) (snd: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
         let neutral, multOp =
             match algStruct with
@@ -198,7 +197,13 @@ type extendedTree<'t when 't: equality> =
                 quadTree.noneCheck neutral <| Node((go a), (go b), (go c), (go d))
             | Leaf a -> quadTree.noneCheck neutral <| quadTree.scalarMultiply snd.tree a multOp neutral
             | None -> None
-        extendedTree(fst.lineSize * snd.colSize, fst.colSize * snd.colSize, go fst.tree)
+        let lineDeviation = snd.specSize - snd.lineSize
+        let colDeviation = snd.specSize - snd.colSize
+        let tempSparse = extendedTree.toSparseMatrix <| extendedTree(fst.lineSize * snd.specSize, fst.colSize * snd.specSize, go fst.tree)
+        let cells = List.map (fun (x: Cell<'t>) -> Cell(x.line - (x.line / snd.specSize) * lineDeviation,
+                                                    x.col - (x.col / snd.specSize) * colDeviation,
+                                                    x.data)) tempSparse.content
+        extendedTree.createTreeOfSparseMatrix algStruct (SparseMatrix(fst.lineSize * snd.lineSize, fst.colSize * snd.colSize, cells))
 
 
     static member private toBoolTree (exTree: extendedTree<'t>) =

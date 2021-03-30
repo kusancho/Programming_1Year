@@ -86,8 +86,8 @@ let testTree =
 
 
         testProperty "autoTests tensorMultiply" <| fun (x1: int) (x2: int)  ->
-            let fst = getPowOfTwo <| abs(x1 % 20) + 5
-            let snd = getPowOfTwo <| abs(x2 % 30) + 5
+            let fst = abs(x1 % 6) + 5
+            let snd = abs(x2 % 5) + 5
             let mtx1 = randomIntSparseMatrix (fst) (fst)
             let mtx2 = randomIntSparseMatrix snd  snd
             Expect.equal

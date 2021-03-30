@@ -12,7 +12,7 @@ module Main =
     [<EntryPoint>]
     let main (argv: string array) =
 
-        let nfa = Star(Alt(RSmb '1', RSmb '0')) |> regexpToNFA
+        let nfa = Star(Alt(RSmb '1', Alt(RSmb '0', Alt(RSmb '3', RSmb '4')))) |> regexpToNFA
         let inline addSets (s1:HashSet<_>) s2 =
             let r = if s1 = null then new HashSet<_>() else new HashSet<_>(s1)
             r.UnionWith s2
@@ -32,7 +32,7 @@ module Main =
         nfaToDot "/home/kusancho/progahw/homework/src/ATMLibrary/NFA2.dot" nfa
 
         let eps = epsClosure <| nfaToTreeNFA nfa semiRing
-        printf "%A"  <| accept eps ['1'; '0'; '1'] semiRing
+        printf "%A"  <| accept eps ['1'; '0'; '3'; '4'; '3'; '9'] semiRing
 
 
         0
