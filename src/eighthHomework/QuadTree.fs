@@ -186,6 +186,7 @@ type extendedTree<'t when 't: equality> =
             extendedTree(fst.lineSize, snd.colSize, quadTree.reduce result resSpecSize fst.specSize)
 
 
+   // need to fix it
     static member tensorMultiply  (fst: extendedTree<'t>) (snd: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
         let neutral, multOp =
             match algStruct with
