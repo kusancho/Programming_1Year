@@ -5,6 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <RootNamespace>ATMLibrary</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
     <Title>homework</Title>
@@ -16,9 +17,7 @@
     
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="AutomataOLD.fs" />
-    <Compile Include="Automata.fs" />
     <Compile Include="RegExp.fs" />
     <Compile Include="Matrices.fs" />
     <Compile Include="Automata.fs" />
