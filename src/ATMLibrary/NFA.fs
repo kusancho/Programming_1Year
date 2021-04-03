@@ -1,4 +1,4 @@
-module AutomataOLD
+module NFA
 
 open System.Collections.Generic
 
@@ -14,32 +14,6 @@ type NFA<'t> =
     new (start, final, transitions) =
         {StartState = start; FinalState = final; Transitions = transitions}
 
-
-[<Struct>]
-type DFA<'t> =
-    val StartState : int
-    val FinalStates : list<int>
-    val Transitions : list<int * 't * int>
-    new (start, final, transitions) =
-        {StartState = start; FinalStates = final; Transitions = transitions}
-
-let rec tryFind lst cond =
-    match lst with
-    | [] -> None
-    | hd :: tl -> if cond hd then Some hd else tryFind tl cond
-
-let recognizeDFA (atm: DFA<_>) (input: list<_>) =
-    let rec _go curState curInput =
-        match curInput with
-        | [] when List.contains curState atm.FinalStates -> true
-        | hd :: tl ->
-            let nextTrans = tryFind atm.Transitions (fun (s,t,f) -> s = curState && t = hd)
-            match nextTrans with
-            | Some (_, _, state) -> _go state tl
-            | None -> false
-        | _ -> false
-
-    _go atm.StartState input
 
 let recognizeNFA (atm: NFA<_>) (input: list<_>) =
     let visited = HashSet<_>()

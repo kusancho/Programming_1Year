@@ -1,7 +1,7 @@
 module Regexp
 
 
-open AutomataOLD
+open NFA
 
 
 type Regexp<'t> =
@@ -10,7 +10,6 @@ type Regexp<'t> =
     | Seq of Regexp<'t> * Regexp<'t>
     | Alt of Regexp<'t> * Regexp<'t>
     | Star of Regexp<'t>
-    | Intersect of Regexp<'t> * Regexp<'t>
 
 
 let regexpToNFA regexp =

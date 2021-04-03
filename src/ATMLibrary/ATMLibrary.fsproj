@@ -17,11 +17,9 @@
     
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AutomataOLD.fs" />
+    <Compile Include="NFA.fs" />
     <Compile Include="RegExp.fs" />
-    <Compile Include="Matrices.fs" />
-    <Compile Include="Automata.fs" />
-    <Compile Include="MatrixNFA.fs" />
+    <Compile Include="TreeNFA.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
