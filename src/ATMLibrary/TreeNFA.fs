@@ -4,92 +4,71 @@ module TreeNFA
 open System.Collections.Generic
 open NFA
 open QuadTree
-open SparseMatrix
+open Regexp
 open AlgebraicStructure
+open SparseMatrix
 
 
 [<Struct>]
-type TreeNFA<'t> =
+type TreeNFA<'t when 't: comparison> =
     val StartState : HashSet<int>
     val FinalState : HashSet<int>
-    val Transitions : extendedTree<HashSet<NFASmb<'t>>>
+    val Transitions : extendedTree<Set<NFASmb<'t>>>
     new (start, final, transitions) =
         {StartState = start; FinalState = final; Transitions = transitions}
 
 
-let inline addSets (s1: HashSet<NFASmb<'t>>) (s2: HashSet<NFASmb<'t>>) =
-        let r = if s1 = null then HashSet<NFASmb<'t>>() else HashSet<NFASmb<'t>>(s1)
-        r.UnionWith s2
-        r
+let inline addSets (s1: Set<NFASmb<'t>>) (s2: Set<NFASmb<'t>>) =
+        let r = if s1.IsEmpty then Set.empty<NFASmb<'t>> else Set<NFASmb<'t>>(s1)
+        Set.union r s2
 
-let inline multSets (s1: HashSet<NFASmb<'t>>) (s2: HashSet<NFASmb<'t>>) =
-    let r = HashSet<_> ()
+let inline multSets (s1: Set<NFASmb<'t>>) (s2: Set<NFASmb<'t>>) =
+    let r = HashSet()
     for x in s1 do
         for y in s2 do
             match x,y with
             | Eps, e -> r.Add e |> ignore
             | _ -> ()
-    r
+    Set(r)
 
 let algStrForBoolOp = SemiRing(new SemiRing<_>(new Monoid<_>((||), false), (&&)))
 
-let algStrForSetsOp<'t> = SemiRing(new SemiRing<HashSet<NFASmb<'t>>>(new Monoid<HashSet<NFASmb<'t>>>(addSets, null), multSets))
-
-let array2DToTreeHash arr =
-    let acc = HashSet()
-    Array2D.iteri (fun i j (item: HashSet<_>) -> if item.Count <> 0 then acc.Add <| Cell(i, j, item) |> ignore else ()) arr
-    extendedTree.createTreeOfSparseMatrix algStrForSetsOp <| SparseMatrix(Array2D.length1 arr, Array2D.length2 arr, List.ofSeq acc)
-
-/// bool array2D -> bool tree
-let array2DToTreeBool arr =
-    let tempAcc = HashSet()
-    Array2D.iteri (fun i j k -> if k <> false then tempAcc.Add <| Cell(i, j, k) |> ignore else ()) arr
-    extendedTree.createTreeOfSparseMatrix
-        algStrForBoolOp
-        <| SparseMatrix(Array2D.length1 arr, Array2D.length2 arr, List.ofSeq tempAcc)
-
-/// bool tree -> bool array2D
-let treeToArray2DBool tree =
-    let lst = SparseMatrix.toListOfCells <| extendedTree.toSparseMatrix tree
-    let mtx = Array2D.init tree.lineSize tree.colSize (fun _ _ -> false)
-    List.iter (fun (i, j, _) -> mtx.[i, j] <- true) lst
-    mtx
-
-
-let treeToArray2DHash (tree: extendedTree<HashSet<_>>) =
-    let lst = SparseMatrix.toListOfCells <| extendedTree.toSparseMatrix tree
-    let mtx = Array2D.init tree.lineSize tree.colSize (fun _ _ -> HashSet())
-    List.iter (fun (i, j, item) -> mtx.[i, j] <- item) lst
-    mtx
+let algStrForSetsOp<'t when 't: comparison> = SemiRing(new SemiRing<Set<NFASmb<'t>>>(new Monoid<Set<NFASmb<'t>>>(addSets, Set.empty<NFASmb<'t>>), multSets))
 
 
 let nfaToTreeNFA (nfa: NFA<_>) =
     let tree =
+        let dict = Dictionary<_, HashSet<_>>()
         let maxState =
            nfa.Transitions
            |> List.fold (fun a (s, _, f) -> max (max s a) f) 0
-        let mtx =
-            Array2D.init
-                (maxState + 1)
-                (maxState + 1)
-                (fun _ _ -> HashSet())
-
         nfa.Transitions
-        |> List.iter (fun (s, l, f) -> mtx.[s, f].Add l |> ignore)
-        array2DToTreeHash mtx
+        |> List.iter (fun (s, l, f) ->
+            if dict.ContainsKey((s, f))
+            then dict.[(s, f)].Add l |> ignore
+            else
+                dict.Add((s, f), HashSet())
+                dict.[(s, f)].Add l |> ignore)
+        let lst = [for keyValue in dict do
+                       let i, j = keyValue.Key
+                       Cell(i, j, Set(keyValue.Value))]
+        extendedTree.createTreeOfSparseMatrix algStrForSetsOp <| SparseMatrix(maxState + 1, maxState + 1, lst)
     TreeNFA(HashSet([nfa.StartState]), HashSet([nfa.FinalState]), tree)
 
 
+let TreeNFAOfRegExp regexp = nfaToTreeNFA <| regexpToNFA regexp
+
+
 let seqToAtm (input: list<_>) =
-    let mtx =
-        let mtx = Array2D.init (input.Length + 1) (input.Length + 1) (fun _ _ -> HashSet())
-        for i in 0 .. input.Length - 1 do
-            mtx.[i, i + 1].Add (Smb (input.[i])) |> ignore
-        mtx
-    TreeNFA(HashSet([0]), HashSet([input.Length]), array2DToTreeHash mtx)
+    let rec makeLst lst index acc =
+        match lst with
+        | hd :: tl -> makeLst tl (index + 1) (acc @ [Cell(index, index + 1, Set([Smb hd]))])
+        | [] -> acc
+    let sparse = SparseMatrix(input.Length + 1, input.Length + 1, makeLst input 0 [])
+    TreeNFA(HashSet([0]), HashSet([input.Length]), extendedTree.createTreeOfSparseMatrix algStrForSetsOp sparse)
 
 
-let toDot (nfa: TreeNFA<_>) outFile =
+let toDot (nfa: TreeNFA<'t>) outFile =
     let header =
         [
             "digraph nfa"
@@ -108,9 +87,9 @@ let toDot (nfa: TreeNFA<_>) outFile =
         ]
 
     let content =
-        treeToArray2DHash nfa.Transitions
-        |> Array2D.mapi (
-            fun s f t ->
+        let lst = SparseMatrix.toListOfCells (extendedTree.toSparseMatrix nfa.Transitions)
+        lst |> List.map (
+            fun (s, f, t) ->
                 t
                 |> Seq.map (fun t ->
                     sprintf
@@ -128,29 +107,25 @@ let epsClosure (atm: TreeNFA<_>) =
 
     let eCls = extendedTree.transitiveClosure atm.Transitions algStrForSetsOp
 
-    let intermediateResult = TreeNFA<_> (atm.StartState, atm.FinalState, eCls)
-
-    toDot intermediateResult "/home/kusancho/progahw/homework/src/ATMLibrary/eClsStep1.dot"
-
-
     let newFinals = HashSet<_>()
 
-    let eCls2D = treeToArray2DHash eCls
+    let cells = List.map (fun (cell: Cell<Set<_>>) ->
+        Cell(cell.line, cell.col, HashSet(cell.data))) (extendedTree.toSparseMatrix eCls).content
 
-    eCls2D |> Array2D.iteri (fun i j x -> if x.Contains Eps && atm.FinalState.Contains j then newFinals.Add i |> ignore)
+    // newFinals filling
+    List.iter (fun (cell: Cell<HashSet<_>>) ->
+        if cell.data.Contains Eps && atm.FinalState.Contains cell.col then newFinals.Add cell.line |> ignore) cells
 
     newFinals.UnionWith atm.FinalState
 
-    eCls2D |> Array2D.iteri (fun i j x -> x.Remove Eps |> ignore)
+    // removing eps edges
+    List.iter (fun (cell: Cell<HashSet<_>>) -> cell.data.Remove Eps |> ignore ) cells
 
-    let res = TreeNFA<_> (atm.StartState, newFinals, array2DToTreeHash eCls2D)
+    let resTree = extendedTree.createTreeOfSparseMatrix algStrForSetsOp
+                  <| SparseMatrix(eCls.lineSize, eCls.colSize,
+                                  List.map (fun (c: Cell<HashSet<_>>) -> Cell(c.line, c.col, Set(c.data))) cells)
 
-    toDot res "/home/kusancho/progahw/homework/src/ATMLibrary/eClsWithoutEpsEdges.dot"
-
-
-    let boolMtx = treeToArray2DHash res.Transitions |> Array2D.map (fun x -> x.Count > 0)
-
-    let boolTree = array2DToTreeBool boolMtx
+    let boolTree = extendedTree.toBoolTree resTree
 
     let reachable = extendedTree.transitiveClosure boolTree algStrForBoolOp
 
@@ -163,28 +138,29 @@ let epsClosure (atm: TreeNFA<_>) =
 
     let newStateToOldState = Dictionary<_,_>()
 
-    reachableFromStart |> Seq.iteri (fun i x -> newStateToOldState.Add (i,x))
+    reachableFromStart |> Seq.iteri (fun i x -> newStateToOldState.Add (x, i)) // (old, new)
+
+    let cellsRes = (extendedTree.toSparseMatrix resTree).content // res -> reachable
 
     let newTransitions =
-        let localVar = treeToArray2DHash res.Transitions
-        let temp = Array2D.init
-                    newStateToOldState.Count
-                    newStateToOldState.Count
-                    (fun i j -> localVar.[newStateToOldState.[i], newStateToOldState.[j]])
-        array2DToTreeHash temp
+        let localLst = List.filter (fun (cell: Cell<_>) -> newStateToOldState.ContainsKey cell.line
+                                                               && newStateToOldState.ContainsKey cell.line ) cellsRes
+
+        let final = List.map (fun (cell: Cell<_>) -> Cell(newStateToOldState.[cell.line],
+                                                          newStateToOldState.[cell.col], cell.data)) localLst
+        SparseMatrix(newStateToOldState.Count, newStateToOldState.Count, final)
+        |> extendedTree.createTreeOfSparseMatrix algStrForSetsOp
 
     let res =
         TreeNFA<_>(
-            newStateToOldState |> Seq.filter (fun x -> atm.StartState.Contains x.Value)
-            |> Seq.map (fun kvp -> kvp.Key)
+            newStateToOldState |> Seq.filter (fun x -> atm.StartState.Contains x.Key)
+            |> Seq.map (fun kvp -> kvp.Value)
             |> fun s -> HashSet(s)
             , newStateToOldState
-              |> Seq.filter (fun x -> newFinals.Contains x.Value)
-              |> Seq.map (fun kvp -> kvp.Key)
+              |> Seq.filter (fun x -> newFinals.Contains x.Key)
+              |> Seq.map (fun kvp -> kvp.Value)
               |> fun x -> HashSet(x)
             , newTransitions)
-
-    toDot res "/home/kusancho/progahw/homework/src/ATMLibrary/eClsFinalResult.dot"
 
     res
 
@@ -195,7 +171,12 @@ let intersect fst snd =
         | SemiRing x -> x.Monoid
         | _ -> failwith "cannot multiply in monoid"
 
-    let tempRing = SemiRing(new SemiRing<_>(monoid, (fun (s1: HashSet<_>) s2 -> let res = HashSet<_>(s1) in res.IntersectWith s2; res)))
+    let func (s1: Set<_>) (s2: Set<_>) =
+        let s1Hash, s2Hash = HashSet(s1), HashSet(s2)
+        let res = HashSet<_>(s1Hash) in res.IntersectWith s2Hash
+        Set(res)
+
+    let tempRing = SemiRing(new SemiRing<_>(monoid, func))
 
     extendedTree.tensorMultiply snd fst tempRing
 
@@ -203,29 +184,33 @@ let intersect fst snd =
 let accept (nfaTree: TreeNFA<_>) (input: list<_>) =
     let nfa2Tree = seqToAtm input
 
-    let intersection = intersect nfaTree.Transitions nfa2Tree.Transitions
+    let eCls = epsClosure nfaTree
+
+    let intersection = intersect eCls.Transitions nfa2Tree.Transitions
 
     let newStartState =
         [ for s1 in nfa2Tree.StartState do
-              for s2 in nfaTree.StartState do
-                s1 * (nfaTree.Transitions.lineSize) + s2
+              for s2 in eCls.StartState do
+                s1 * (eCls.Transitions.lineSize) + s2
         ]
         |> fun s -> HashSet<_>(s)
 
     let newFinalStates =
         [
             for s1 in nfa2Tree.FinalState do
-                for s2 in nfaTree.FinalState do
-                    s1 * (nfaTree.Transitions.lineSize) + s2
+                for s2 in eCls.FinalState do
+                    s1 * eCls.Transitions.lineSize + s2
         ]
 
-    toDot nfa2Tree "/home/kusancho/progahw/homework/src/ATMLibrary/nfa2.dot"
-    toDot (TreeNFA<_>(newStartState, HashSet<_>(newFinalStates), intersection)) "/home/kusancho/progahw/homework/src/ATMLibrary/outIntersection.dot"
+    let projected = extendedTree.toBoolTree intersection
 
-    let projectedArray = (treeToArray2DHash intersection) |> Array2D.map (fun s -> s.Count > 0)
+    let reachability = (extendedTree.transitiveClosure projected algStrForBoolOp)
 
-    let reachabilityArr = treeToArray2DBool (extendedTree.transitiveClosure (array2DToTreeBool projectedArray) algStrForBoolOp)
+    let cells = (extendedTree.toSparseMatrix reachability).content
+
+    let existsPath start final =
+        List.fold (fun acc3 (cell: Cell<_>) -> acc3 || cell.line = start && cell.col = final) false cells
 
     newFinalStates
     |> List.fold (
-        fun a s -> a || (Seq.fold (fun a2 s2 -> a2 || reachabilityArr.[s2, s]) false newStartState)) false
+        fun aсс final -> aсс || (Seq.fold (fun acc2 start -> acc2 || existsPath start final) false newStartState)) false

@@ -63,7 +63,7 @@ type quadTree<'t when 't: equality> =
                     quadTree.scalarMultiply b scalar multOp neutral,
                     quadTree.scalarMultiply c scalar multOp neutral,
                     quadTree.scalarMultiply d scalar multOp neutral)
-            | Leaf(a) -> Leaf(multOp scalar a)
+            | Leaf(a) -> quadTree.noneCheck neutral <| Leaf(multOp scalar a)
             | None -> None
 
 
@@ -195,7 +195,7 @@ type extendedTree<'t when 't: equality> =
             match tree with
             | Node(a, b, c, d) ->
                 quadTree.noneCheck neutral <| Node((go a), (go b), (go c), (go d))
-            | Leaf a -> quadTree.noneCheck neutral <| quadTree.scalarMultiply snd.tree a multOp neutral
+            | Leaf a -> quadTree.scalarMultiply snd.tree a multOp neutral
             | None -> None
         let lineDeviation = snd.specSize - snd.lineSize
         let colDeviation = snd.specSize - snd.colSize
@@ -206,11 +206,11 @@ type extendedTree<'t when 't: equality> =
         extendedTree.createTreeOfSparseMatrix algStruct (SparseMatrix(fst.lineSize * snd.lineSize, fst.colSize * snd.colSize, cells))
 
 
-    static member private toBoolTree (exTree: extendedTree<'t>) =
+    static member toBoolTree (exTree: extendedTree<'t>) =
         let rec go tree =
             match tree with
             | Node(a, b, c, d) -> Node(go a, go b, go c, go d)
-            | Leaf a -> Leaf true
+            | Leaf _ -> Leaf true
             | None -> None
         extendedTree(exTree.lineSize, exTree.colSize, go exTree.tree)
 
