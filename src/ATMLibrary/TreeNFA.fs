@@ -19,17 +19,12 @@ type TreeNFA<'t when 't: comparison> =
 
 
 let inline addSets (s1: Set<NFASmb<'t>>) (s2: Set<NFASmb<'t>>) =
-        let r = if s1.IsEmpty then Set.empty<NFASmb<'t>> else Set<NFASmb<'t>>(s1)
-        Set.union r s2
+        Set.union s1 s2
 
 let inline multSets (s1: Set<NFASmb<'t>>) (s2: Set<NFASmb<'t>>) =
-    let r = HashSet()
-    for x in s1 do
-        for y in s2 do
-            match x,y with
-            | Eps, e -> r.Add e |> ignore
-            | _ -> ()
-    Set(r)
+    let temp = Set.map (fun s1 -> if s1 = Eps then s2 else Set.empty) s1
+    Set.unionMany temp
+
 
 let algStrForBoolOp = SemiRing(new SemiRing<_>(new Monoid<_>((||), false), (&&)))
 
