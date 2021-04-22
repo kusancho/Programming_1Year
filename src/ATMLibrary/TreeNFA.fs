@@ -55,35 +55,34 @@ let TreeNFAOfRegExp regexp = nfaToTreeNFA <| regexpToNFA regexp
 
 
 let seqToAtm (input: list<_>) =
-    let rec makeLst lst index acc =
-        match lst with
-        | hd :: tl -> makeLst tl (index + 1) (acc @ [Cell(index, index + 1, Set([Smb hd]))])
-        | [] -> acc
-    let sparse = SparseMatrix(input.Length + 1, input.Length + 1, makeLst input 0 [])
-    TreeNFA(HashSet([0]), HashSet([input.Length]), extendedTree.createTreeOfSparseMatrix algStrForSetsOp sparse)
+    let tree = extendedTree.init (input.Length + 1) (input.Length + 1)
+                                 (fun i j -> if i + 1 = j then Set([Smb input.[i]]) else Set.empty<_>)
+               |> extendedTree.clearNeutral Set.empty<_>
+    TreeNFA(HashSet([0]), HashSet([input.Length]), tree)
 
 
-let toDot (nfa: TreeNFA<'t>) outFile =
+let toDot (nfaTree: TreeNFA<'t>) outFile =
     let header =
         [
             "digraph nfa"
             "{"
             "rankdir = LR"
             "node [shape = circle];"
-            for s in nfa.StartState do
+            for s in nfaTree.StartState do
                 sprintf "%A[shape = circle, label = \"%A_Start\"]" s s
         ]
 
     let footer =
         [
-             for s in nfa.FinalState do
+             for s in nfaTree.FinalState do
                 sprintf "%A[shape = doublecircle]" s
              "}"
         ]
 
     let content =
-        let lst = SparseMatrix.toListOfCells (extendedTree.toSparseMatrix nfa.Transitions)
-        lst |> List.map (
+        extendedTree.mapi (fun i j item -> Cell(i, j, item)) nfaTree.Transitions
+        |> extendedTree.fold (fun acc item -> acc @ [(item.line, item.col, item.data)]) []
+        |> List.map (
             fun (s, f, t) ->
                 t
                 |> Seq.map (fun t ->
@@ -104,21 +103,13 @@ let epsClosure (atm: TreeNFA<_>) =
 
     let newFinals = HashSet<_>()
 
-    let cells = List.map (fun (cell: Cell<Set<_>>) ->
-        Cell(cell.line, cell.col, HashSet(cell.data))) (extendedTree.toSparseMatrix eCls).content
-
-    // newFinals filling
-    List.iter (fun (cell: Cell<HashSet<_>>) ->
-        if cell.data.Contains Eps && atm.FinalState.Contains cell.col then newFinals.Add cell.line |> ignore) cells
+    extendedTree.iteri
+        (fun i j (item: Set<_>) -> if item.Contains Eps && atm.FinalState.Contains j then newFinals.Add i |> ignore)
+        eCls
 
     newFinals.UnionWith atm.FinalState
 
-    // removing eps edges
-    List.iter (fun (cell: Cell<HashSet<_>>) -> cell.data.Remove Eps |> ignore ) cells
-
-    let resTree = extendedTree.createTreeOfSparseMatrix algStrForSetsOp
-                  <| SparseMatrix(eCls.lineSize, eCls.colSize,
-                                  List.map (fun (c: Cell<HashSet<_>>) -> Cell(c.line, c.col, Set(c.data))) cells)
+    let resTree = extendedTree.map (fun (set: Set<_>) -> set.Remove Eps) eCls
 
     let boolTree = extendedTree.toBoolTree resTree
 
@@ -126,25 +117,21 @@ let epsClosure (atm: TreeNFA<_>) =
 
     let reachableFromStart = HashSet<_>()
 
-    for item in (extendedTree.toSparseMatrix reachable).content do
-        if atm.StartState.Contains item.line then reachableFromStart.Add item.col |> ignore
+    extendedTree.iteri (fun i j _ ->if atm.StartState.Contains i then reachableFromStart.Add j |> ignore) reachable
 
     reachableFromStart.UnionWith atm.StartState
 
     let newStateToOldState = Dictionary<_,_>()
 
-    reachableFromStart |> Seq.iteri (fun i x -> newStateToOldState.Add (x, i)) // (old, new)
+    reachableFromStart |> Seq.iteri (fun i x -> newStateToOldState.Add (i, x)) // (new, old)
 
-    let cellsRes = (extendedTree.toSparseMatrix resTree).content // res -> reachable
+    let tree = extendedTree.init newStateToOldState.Count newStateToOldState.Count
+                   (fun _ _ -> Set.empty<_>)
 
     let newTransitions =
-        let localLst = List.filter (fun (cell: Cell<_>) -> newStateToOldState.ContainsKey cell.line
-                                                               && newStateToOldState.ContainsKey cell.line ) cellsRes
-
-        let final = List.map (fun (cell: Cell<_>) -> Cell(newStateToOldState.[cell.line],
-                                                          newStateToOldState.[cell.col], cell.data)) localLst
-        SparseMatrix(newStateToOldState.Count, newStateToOldState.Count, final)
-        |> extendedTree.createTreeOfSparseMatrix algStrForSetsOp
+        let temp = resTree.fillNeutral Set.empty<_>
+        tree
+        |> extendedTree.mapi  (fun i j item -> temp.getByIndex newStateToOldState.[i] newStateToOldState.[j])
 
     let res =
         TreeNFA<_>(
@@ -156,7 +143,6 @@ let epsClosure (atm: TreeNFA<_>) =
               |> Seq.map (fun kvp -> kvp.Value)
               |> fun x -> HashSet(x)
             , newTransitions)
-
     res
 
 
@@ -199,13 +185,10 @@ let accept (nfaTree: TreeNFA<_>) (input: list<_>) =
 
     let projected = extendedTree.toBoolTree intersection
 
-    let reachability = (extendedTree.transitiveClosure projected algStrForBoolOp)
+    let reachability = extendedTree.transitiveClosure projected algStrForBoolOp
 
-    let cells = (extendedTree.toSparseMatrix reachability).content
-
-    let existsPath start final =
-        List.fold (fun acc3 (cell: Cell<_>) -> acc3 || cell.line = start && cell.col = final) false cells
+    let fullEcls = reachability.fillNeutral false
 
     newFinalStates
     |> List.fold (
-        fun aсс final -> aсс || (Seq.fold (fun acc2 start -> acc2 || existsPath start final) false newStartState)) false
+        fun a s -> a || (Seq.fold (fun a2 s2 -> a2 || fullEcls.getByIndex s2 s) false newStartState) ) false

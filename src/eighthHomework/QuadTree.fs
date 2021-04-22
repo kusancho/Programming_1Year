@@ -3,6 +3,7 @@ module QuadTree
 
 open AlgebraicStructure
 open SparseMatrix
+open System.Collections.Generic
 
 
 type quadTree<'t when 't: equality> =
@@ -95,6 +96,25 @@ type extendedTree<'t when 't: equality> =
             && this.tree = this.tree
         | _ -> false
 
+    static member private forceCreate (sparseMatrix: SparseMatrix<'t>) =
+        let rec go lineBorder colBorder =
+            if SparseMatrix.isEmptyInPlace sparseMatrix lineBorder colBorder
+            then None
+            else
+                match lineBorder, colBorder with
+                | (a, b), (c, d) when a = b ->  // coordinate of one Cell
+                    Leaf(SparseMatrix.getContent sparseMatrix a c)
+                | (a, b), (c, d) ->
+                    let lineHalf = a + (b - a) / 2
+                    let colHalf = c + (d - c) / 2
+                    Node((go (a, lineHalf) (c, colHalf)),                                 //NW
+                         (go (a, lineHalf) (colHalf + 1, d)),                             //NE
+                         (go (lineHalf + 1, b) (c, colHalf)),                             //SW
+                         (go (lineHalf + 1, b) (colHalf + 1, d)))                         //SE
+
+        let border = sparseMatrix.specSize
+        extendedTree(sparseMatrix.lineSize, sparseMatrix.colSize, (go (0, border - 1) (0, border - 1)))
+
 
     static member toSparseMatrix (exTree: extendedTree<'t>) =
         let size = exTree.specSize
@@ -112,6 +132,121 @@ type extendedTree<'t when 't: equality> =
             | None -> []
         SparseMatrix(exTree.lineSize, exTree.colSize, go 0 (size - 1) 0 (size - 1) exTree.tree)
 
+
+    static member init lineSize colSize (func: int -> int -> 't) =
+        let acc = HashSet<Cell<'t>>()
+        for i in 0 .. lineSize - 1 do
+            for j in 0 .. colSize - 1 do
+                acc.Add <| Cell(i, j, func i j) |> ignore
+        extendedTree.forceCreate (SparseMatrix(lineSize, colSize, List.ofSeq acc))
+
+
+    static member clearNeutral neutral (tree: extendedTree<'t>) =
+        let rec go tree =
+            match tree with
+            | Node(a, b, c, d) ->
+                quadTree.noneCheck neutral <| Node(go a,
+                                                   go b,
+                                                   go c,
+                                                   go d)
+            | Leaf(a) -> quadTree.noneCheck neutral <| Leaf(a)
+            | None -> None
+        extendedTree(tree.lineSize, tree.colSize, go tree.tree)
+
+
+    member this.fillNeutral (neutral: 't) =
+        let content = (extendedTree.toSparseMatrix this).content
+        let flagLst = [for item in content -> (item.line, item.col)]
+        let contWithNeutrals = [for i in 0 .. this.lineSize - 1 do
+                                    for j in 0 .. this.colSize - 1 do
+                                        if not <| List.contains (i, j) flagLst
+                                        then Cell(i, j, neutral)]
+        extendedTree.forceCreate <| SparseMatrix(this.lineSize, this.colSize, List.concat [contWithNeutrals; content])
+
+
+    /// if element is None, it will break
+    member this.getByIndex i j  =
+        let size = this.specSize
+        if this.lineSize <= i || this.colSize <= j || i < 0 || j < 0
+        then failwith "Index was outside the bounds of the array."
+        let rec go lineH lineL colH colL tree =
+            match tree with
+            | Leaf(a) -> a
+            | Node(a, b, c, d) ->
+                let lineHalf = lineH + (lineL - lineH) / 2
+                let colHalf = colH + (colL - colH) / 2
+                match i, j with
+                | i, j when i <= lineHalf && j <= colHalf -> go lineH lineHalf colH colHalf a
+                | i, j when i <= lineHalf && j > colHalf -> go lineH lineHalf (colHalf + 1) colL b
+                | i, j when i > lineHalf && j <= colHalf -> go (lineHalf + 1) lineL colH colHalf c
+                | i, j when i > lineHalf && j > colHalf -> go (lineHalf + 1) lineL (colHalf + 1) colL d
+                | _ -> failwith "Index was outside the bounds of the array."
+            | None -> failwith "read member description"
+        go 0 (size - 1) 0 (size - 1) this.tree
+
+
+    static member iteri (func: int -> int -> 't -> unit) (tree: extendedTree<'t>) =
+        let size = tree.specSize
+        let rec go lineH lineL colH colL tree =
+            match tree with
+            | Leaf(a) ->
+                func lineH colH a
+            | Node(a, b, c, d) ->
+                let lineHalf = lineH + (lineL - lineH) / 2
+                let colHalf = colH + (colL - colH) / 2
+                (go lineH lineHalf colH colHalf a)
+                (go lineH lineHalf (colHalf + 1) colL b)
+                (go (lineHalf + 1) lineL colH colHalf c)
+                (go (lineHalf + 1) lineL (colHalf + 1) colL d)
+            | None -> ()
+        go 0 (size - 1) 0 (size - 1) tree.tree
+
+
+    /// not enough safe, possible situation:
+    /// Node(None, None, None, Leaf(1)) -> Node(None, None, None, Leaf(0))
+    /// expected: None
+    static member mapi (func: int -> int -> 't -> 'a) (exTree: extendedTree<'t>) =
+        let size = exTree.specSize
+        let rec go lineH lineL colH colL tree =
+            match tree with
+            | Leaf(a) -> Leaf(func lineH colH a)
+            | Node(a, b, c, d) ->
+                let lineHalf = lineH + (lineL - lineH) / 2
+                let colHalf = colH + (colL - colH) / 2
+                Node((go lineH lineHalf colH colHalf a),
+                     (go lineH lineHalf (colHalf + 1) colL b),
+                     (go (lineHalf + 1) lineL colH colHalf c),
+                     (go (lineHalf + 1) lineL (colHalf + 1) colL d))
+            | None -> None
+        extendedTree(exTree.lineSize, exTree.colSize, go 0 (size - 1) 0 (size - 1) exTree.tree)
+
+
+    /// application func to non None elements
+    static member fold (func: 'a -> 't -> 'a) (acc: 'a) (tree: extendedTree<'t>) =
+        let rec go tree acc =
+            match tree with
+            | Node(a, b, c, d) ->
+                go d (go c (go b (go a acc)))
+            | Leaf(a) -> func acc a
+            | None -> acc
+        go tree.tree acc
+
+
+    /// application func to non None elements
+    static member map (func: 't -> 'a) (exTree: extendedTree<'t>) =
+        let size = exTree.specSize
+        let rec go lineH lineL colH colL tree =
+            match tree with
+            | Leaf(a) -> Leaf(func a)
+            | Node(a, b, c, d) ->
+                let lineHalf = lineH + (lineL - lineH) / 2
+                let colHalf = colH + (colL - colH) / 2
+                Node((go lineH lineHalf colH colHalf a),
+                     (go lineH lineHalf (colHalf + 1) colL b),
+                     (go (lineHalf + 1) lineL colH colHalf c),
+                     (go (lineHalf + 1) lineL (colHalf + 1) colL d))
+            | None -> None
+        extendedTree(exTree.lineSize, exTree.colSize, go 0 (size - 1) 0 (size - 1) exTree.tree)
 
     static member sumExTree (x: extendedTree<'t>) (y: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
         let monoid =
