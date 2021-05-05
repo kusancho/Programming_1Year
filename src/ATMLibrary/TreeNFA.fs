@@ -2,7 +2,7 @@ module TreeNFA
 
 
 open System.Collections.Generic
-open NFA
+open ListNFA
 open QuadTree
 open Regexp
 open AlgebraicStructure
@@ -31,7 +31,7 @@ let algStrForBoolOp = SemiRing(new SemiRing<_>(new Monoid<_>((||), false), (&&))
 let algStrForSetsOp<'t when 't: comparison> = SemiRing(new SemiRing<Set<NFASmb<'t>>>(new Monoid<Set<NFASmb<'t>>>(addSets, Set.empty<NFASmb<'t>>), multSets))
 
 
-let nfaToTreeNFA (nfa: NFA<_>) =
+let nfaToTreeNFA (nfa: ListNFA<_>) =
     let tree =
         let dict = Dictionary<_, HashSet<_>>()
         let maxState =

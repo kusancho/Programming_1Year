@@ -17,6 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="interface.fs" />
     <Compile Include="SparseMatrix.fs" />
     <Compile Include="AlgebraicStructure.fs" />
     <Compile Include="QuadTree.fs" />

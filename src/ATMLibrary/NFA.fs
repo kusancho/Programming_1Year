@@ -1,75 +1,100 @@
 module NFA
 
-open System.Collections.Generic
 
-type NFASmb<'t> =
+open advancedMatrix
+
+
+type ISmb<'t> =
+    abstract PrettyString: string
+
+
+
+type Smb<'t> =
     | Eps
     | Smb of 't
+    interface ISmb<'t> with
+        member this.PrettyString =
+            match this with
+            | Eps -> "Eps"
+            | Smb t -> t.ToString()
 
-[<Struct>]
+
 type NFA<'t> =
-    val StartState : int
-    val FinalState : int
-    val Transitions : list<int * NFASmb<'t> * int>
-    new (start, final, transitions) =
-        {StartState = start; FinalState = final; Transitions = transitions}
+    val StartState: int
+    val FinalState: int
+    val TransitionsList : advancedMatrix<int * int * ISmb<'t>>
+    member this.ToDot outFile =
+        let header =
+            [
+                "digraph nfa"
+                "{"
+                "rankdir = LR"
+                "node [shape = circle];"
+                sprintf "%A[shape = circle, label = \"%A_Start\"]" this.StartState this.StartState
+            ]
 
+        let footer =
+            [
+                sprintf "%A[shape = doublecircle]" this.FinalState
+                "}"
+            ]
 
-let recognizeNFA (atm: NFA<_>) (input: list<_>) =
-    let visited = HashSet<_>()
-    let step curState curInput =
-        visited.Add((curState, curInput)) |> ignore
-        atm.Transitions
-        |> List.choose (fun (s,t,f) ->
-            if s = curState
-            then
-                match t with
-                | Eps -> Some (f, curInput)
-                | Smb smb ->
-                    match curInput with
-                    | curSmb :: restInput when smb = curSmb -> Some (f, restInput)
-                    | _ -> None
-            else None)
+        let content =
+            [
+                for s, f, t in this.TransitionsList do
+                    sprintf
+                        "%A -> %A [label = \"%s\"]"
+                        s
+                        f
+                        t.PrettyString
+            ]
 
-    let rec _go configurations =
-        match configurations with
-        | [] -> false
-        | (s, input) :: tl ->
-            let containsFinal =
-                List.exists
-                    (fun (s, input) -> s = atm.FinalState && input = [])
-                    configurations
-            let notVisited =
-                step s input |> List.filter (fun x -> visited.Contains x |> not)
-            containsFinal || (_go (tl @ notVisited))
+        System.IO.File.WriteAllLines (outFile, header @ content @ footer)
 
-    _go [(atm.StartState, input)]
+    member this.epsClosure =
 
+        let eCls = this.transitiveClosure
 
-let nfaToDot outFile (nfa:NFA<'t>) =
-    let header =
-        [
-            "digraph nfa"
-            "{"
-            "rankdir = LR"
-            "node [shape = circle];"
-            sprintf "%A[shape = circle, label = \"%A_Start\"]" nfa.StartState nfa.StartState
-        ]
+        let newFinals = HashSet<_>()
 
-    let footer =
-        [
-            sprintf "%A[shape = doublecircle]" nfa.FinalState
-            "}"
-        ]
+        extendedTree.iteri
+            (fun i j (item: Set<_>) -> if item.Contains Eps && atm.FinalState.Contains j then newFinals.Add i |> ignore)
+            eCls
 
-    let content =
-        [
-            for (s,t,f) in nfa.Transitions ->
-                sprintf
-                    "%A -> %A [label = \"%s\"]"
-                    s
-                    f
-                    (match t with Eps -> "Eps" | Smb t -> sprintf "%A" t)
-        ]
+        newFinals.UnionWith atm.FinalState
 
-    System.IO.File.WriteAllLines (outFile, header @ content @ footer)
+        let resTree = extendedTree.map (fun (set: Set<_>) -> set.Remove Eps) eCls
+
+        let boolTree = extendedTree.toBoolTree resTree
+
+        let reachable = extendedTree.transitiveClosure boolTree algStrForBoolOp
+
+        let reachableFromStart = HashSet<_>()
+
+        extendedTree.iteri (fun i j _ ->if atm.StartState.Contains i then reachableFromStart.Add j |> ignore) reachable
+
+        reachableFromStart.UnionWith atm.StartState
+
+        let newStateToOldState = Dictionary<_,_>()
+
+        reachableFromStart |> Seq.iteri (fun i x -> newStateToOldState.Add (i, x)) // (new, old)
+
+        let tree = extendedTree.init newStateToOldState.Count newStateToOldState.Count
+                       (fun _ _ -> Set.empty<_>)
+
+        let newTransitions =
+            let temp = resTree.fillNeutral Set.empty<_>
+            tree
+            |> extendedTree.mapi  (fun i j item -> temp.getByIndex newStateToOldState.[i] newStateToOldState.[j])
+
+        let res =
+            TreeNFA<_>(
+                newStateToOldState |> Seq.filter (fun x -> atm.StartState.Contains x.Key)
+                |> Seq.map (fun kvp -> kvp.Value)
+                |> fun s -> HashSet(s)
+                , newStateToOldState
+                  |> Seq.filter (fun x -> newFinals.Contains x.Key)
+                  |> Seq.map (fun kvp -> kvp.Value)
+                  |> fun x -> HashSet(x)
+                , newTransitions)
+        res
