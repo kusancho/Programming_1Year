@@ -20,9 +20,9 @@ type CliArguments =
             | Lines _ -> "Specify the number of rows"
             | Cols _ -> "Specify the number of cols"
             | Amount _ -> "Specify the number of matrices"
-            | Sparsity _ -> "Specify the sparsity as number from 0.0 to 1.0"
+            | Sparsity _ -> "Specify the sparsity as number from 0.0 to 1.0 (percentage of neutral elements)"
             | Path _ -> "Specify the target directory"
-            | Type _ -> "Specify the type of matrices"
+            | Type _ -> "Specify the type of matrices (int, float, bool)"
 
 [<EntryPoint>]
     let main (argv: string array) =
