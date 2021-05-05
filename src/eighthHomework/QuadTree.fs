@@ -96,8 +96,8 @@ type extendedTree<'t when 't: equality> =
         | _ -> false
 
 
-    static member toSparseMatrix (exTree: extendedTree<'t>) =
-        let size = exTree.specSize
+    member this.toSparseMatrix =
+        let size = this.specSize
         let rec go lineH lineL colH colL tree =
             match tree with
             | Leaf(a) ->
@@ -110,7 +110,7 @@ type extendedTree<'t when 't: equality> =
                  (go (lineHalf + 1) lineL colH colHalf c) @
                  (go (lineHalf + 1) lineL (colHalf + 1) colL d))
             | None -> []
-        SparseMatrix(exTree.lineSize, exTree.colSize, go 0 (size - 1) 0 (size - 1) exTree.tree)
+        SparseMatrix(this.lineSize, this.colSize, go 0 (size - 1) 0 (size - 1) this.tree)
 
 
     static member sumExTree (x: extendedTree<'t>) (y: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
@@ -152,10 +152,10 @@ type extendedTree<'t when 't: equality> =
         match fst.specSize, snd.specSize with
         | a, b when a > b ->
             fst, extendedTree.createTreeOfSparseMatrix algStruct <|
-                       (SparseMatrix(fst.lineSize, fst.colSize, (extendedTree.toSparseMatrix snd).content))
+                       (SparseMatrix(fst.lineSize, fst.colSize, snd.toSparseMatrix.content))
         | _, _ ->
             (extendedTree.createTreeOfSparseMatrix algStruct <|
-                       (SparseMatrix(snd.lineSize, snd.colSize, (extendedTree.toSparseMatrix fst).content))), snd
+                       (SparseMatrix(snd.lineSize, snd.colSize, fst.toSparseMatrix.content))), snd
 
 
     static member multiply (fst: extendedTree<'t>) (snd: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
@@ -209,17 +209,17 @@ type extendedTree<'t when 't: equality> =
         extendedTree(exTree.lineSize, exTree.colSize, go exTree.tree)
 
 
-    static member transitiveClosure (exTree: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
+    member this.transitiveClosure (algStruct: AlgebraicStruct<'t>) =
         let monoid, semiRing =
             match algStruct with
             | Monoid x -> failwith "can't multiply in monoid"
             | SemiRing x -> Monoid x.Monoid, SemiRing x
-        let n = max exTree.lineSize exTree.colSize
+        let n = max this.lineSize this.colSize
         let rec accumulate curr iter acc =
             if iter = 0
             then acc
             else
-                let temp = extendedTree.multiply exTree curr semiRing
+                let temp = extendedTree.multiply this curr semiRing
                 accumulate temp (iter - 1) (acc @ [temp])
-        let lstOfMtx = accumulate exTree n []
-        List.fold (fun acc x -> extendedTree.sumExTree acc x monoid) exTree lstOfMtx
+        let lstOfMtx = accumulate this n []
+        List.fold (fun acc x -> extendedTree.sumExTree acc x monoid) this lstOfMtx
