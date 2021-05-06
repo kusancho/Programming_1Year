@@ -1,6 +1,6 @@
 module NFA
 
-
+(*
 open advancedMatrix
 
 
@@ -98,3 +98,4 @@ type NFA<'t> =
                   |> fun x -> HashSet(x)
                 , newTransitions)
         res
+*)

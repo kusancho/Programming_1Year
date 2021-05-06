@@ -4,7 +4,6 @@ module QuadTree
 open AlgebraicStructure
 open SparseMatrix
 open System.Collections.Generic
-open _interface
 
 
 type quadTree<'t when 't: equality> =

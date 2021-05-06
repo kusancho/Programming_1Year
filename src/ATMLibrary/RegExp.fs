@@ -52,7 +52,7 @@ let regexpToNFA regexp =
 
         | Star r ->
             let newAtm = _go curFreeState r
-            let newStart = newAtm.FinalState + 1н
+            let newStart = newAtm.FinalState + 1
             let newFinal = newAtm.FinalState + 2
             let transitions =
                 [
