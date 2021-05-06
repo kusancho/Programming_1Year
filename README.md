@@ -1,8 +1,5 @@
 Repository is for programming practice homework ( 1 semester )
 
---номерзадания-exercise
-
---help (помощь))
 
 ## Builds
 
