@@ -1,7 +1,7 @@
 module ATMLibraryTests
 
 open Expecto
-open NFA
+open ListNFA
 open QuadTree
 open TreeNFA
 open Regexp
