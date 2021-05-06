@@ -36,9 +36,9 @@ let toBoolSparse (sparse: SparseMatrix<string>) =
 let extTreeToDotAfterTrClosure outFile (exTree: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
     let numberOfVertexes = max exTree.lineSize exTree.colSize
     let arrOfVertexes = Array.init numberOfVertexes (id)
-    let originalLst = (exTree.toSparseMatrix |> SparseMatrix.toListOfCells)
+    let originalLst = (exTree |> extendedTree.toSparseMatrix |> SparseMatrix.toListOfCells)
     let originCort = List.map (fun (x, y, z) -> (x, y)) originalLst
-    let closedLst = (exTree.transitiveClosure algStruct).toSparseMatrix |> SparseMatrix.toListOfCells
+    let closedLst = (extendedTree.transitiveClosure exTree algStruct |> extendedTree.toSparseMatrix |> SparseMatrix.toListOfCells)
     let remainedLst = List.filter (fun (x, y, _) -> not (List.contains (x, y) originCort)) closedLst
     let head = ["digraph transitiveClosure"
                 "{" ]

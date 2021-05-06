@@ -82,7 +82,7 @@ let testTree =
             let sparse = randomIntSparseMatrix (size + 10) size
             let tree = extendedTree.createTreeOfSparseMatrix monoid sparse
             let arr = genArrayBySparseMatrix sparse
-            Expect.equal (genArrayBySparseMatrix <| tree.toSparseMatrix) arr " "
+            Expect.equal (genArrayBySparseMatrix <| extendedTree.toSparseMatrix tree) arr " "
 
 
         testProperty "autoTests tensorMultiply" <| fun (x1: int) (x2: int)  ->
@@ -93,8 +93,8 @@ let testTree =
             Expect.equal
                 (tensor mtx1 mtx2)
                 (genArrayBySparseMatrix
-                (extendedTree.tensorMultiply (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx1)
-                     (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx2) semiRingAlg).toSparseMatrix) ""
+                (extendedTree.toSparseMatrix
+                (extendedTree.tensorMultiply (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx1) (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx2) semiRingAlg))) ""
 
 
         testProperty "autoTests sum" <| fun (x: int) ->
@@ -103,7 +103,7 @@ let testTree =
             let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
             let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
             let sumArr = arrSum fArr sArr
-            let sparseSum = (extendedTree.sumExTree fTree sTree monoid).toSparseMatrix
+            let sparseSum = extendedTree.toSparseMatrix <| extendedTree.sumExTree fTree sTree monoid
             Expect.equal (genArrayBySparseMatrix sparseSum) sumArr
 
 
@@ -114,7 +114,7 @@ let testTree =
             let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
             let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
             let multArr = matrixMultiply fArr sArr
-            let sparseMult = (extendedTree.multiply fTree sTree semiRingAlg).toSparseMatrix
+            let sparseMult = extendedTree.toSparseMatrix <| extendedTree.multiply fTree sTree semiRingAlg
             Expect.equal (genArrayBySparseMatrix sparseMult) multArr
 
 
