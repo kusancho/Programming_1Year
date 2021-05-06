@@ -99,7 +99,7 @@ let toDot (nfaTree: TreeNFA<'t>) outFile =
 
 let epsClosure (atm: TreeNFA<_>) =
 
-    let eCls = extendedTree.transitiveClosure atm.Transitions algStrForSetsOp
+    let eCls = atm.Transitions.transitiveClosure algStrForSetsOp
 
     let newFinals = HashSet<_>()
 
@@ -113,7 +113,7 @@ let epsClosure (atm: TreeNFA<_>) =
 
     let boolTree = extendedTree.toBoolTree resTree
 
-    let reachable = extendedTree.transitiveClosure boolTree algStrForBoolOp
+    let reachable = boolTree.transitiveClosure algStrForBoolOp
 
     let reachableFromStart = HashSet<_>()
 
@@ -185,7 +185,7 @@ let accept (nfaTree: TreeNFA<_>) (input: list<_>) =
 
     let projected = extendedTree.toBoolTree intersection
 
-    let reachability = extendedTree.transitiveClosure projected algStrForBoolOp
+    let reachability = projected.transitiveClosure algStrForBoolOp
 
     let fullEcls = reachability.fillNeutral false
 

@@ -20,7 +20,7 @@ let testTree =
 
         testCase "seq to ATM" <| fun _ ->
             let atm = seqToAtm str
-            let trans = SparseMatrix.toListOfCells <| extendedTree.toSparseMatrix atm.Transitions
+            let trans = SparseMatrix.toListOfCells <| atm.Transitions.toSparseMatrix
             let origTrans = Set([(0, 1, Set([Smb 't'])); (1, 2, Set([Smb 'e']))
                                  (2, 3, Set([Smb 's'])); (3, 4, Set([Smb 't']))])
             Expect.equal (Set(trans)) origTrans " "
