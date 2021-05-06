@@ -4,6 +4,7 @@ module QuadTree
 open AlgebraicStructure
 open SparseMatrix
 open System.Collections.Generic
+open _interface
 
 
 type quadTree<'t when 't: equality> =
@@ -155,7 +156,7 @@ type extendedTree<'t when 't: equality> =
 
 
     member this.fillNeutral (neutral: 't) =
-        let content = this.toSparseMatrix.content
+        let content = (extendedTree.toSparseMatrix this).content
         let flagLst = [for item in content -> (item.line, item.col)]
         let contWithNeutrals = [for i in 0 .. this.lineSize - 1 do
                                     for j in 0 .. this.colSize - 1 do
@@ -334,7 +335,7 @@ type extendedTree<'t when 't: equality> =
             | None -> None
         let lineDeviation = snd.specSize - snd.lineSize
         let colDeviation = snd.specSize - snd.colSize
-        let tempSparse = extendedTree(fst.lineSize * snd.specSize, fst.colSize * snd.specSize, go fst.tree).toSparseMatrix
+        let tempSparse = extendedTree.toSparseMatrix <| extendedTree(fst.lineSize * snd.specSize, fst.colSize * snd.specSize, go fst.tree)
         let cells = List.map (fun (x: Cell<'t>) -> Cell(x.line - (x.line / snd.specSize) * lineDeviation,
                                                     x.col - (x.col / snd.specSize) * colDeviation,
                                                     x.data)) tempSparse.content
