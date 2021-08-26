@@ -1,8 +1,7 @@
 module MatrixGeneratorTests
 
 open Expecto
-open Generator
-open System.IO
+open writePrint
 
 
 // CONFIG - sparsity: 0.2 lineSize: 100 colSize: 100 amount: 1
@@ -10,19 +9,8 @@ let path = __SOURCE_DIRECTORY__ + "/Matrix0.txt"
 
 let sparsity, colSize, lineSize = 0.2, 100, 100
 
-let readIntMatrix path =
-    let strings = File.ReadAllLines path
-    let colSize = strings.[0].Split(' ').Length
-    [|for i in 0 .. strings.Length - 1 ->
-      [|
-      let subString = strings.[i].Split(' ')
-      if subString.Length <> colSize then failwith "wrong matrix"
-      for j in 0 .. colSize - 1 ->
-          int <| subString.[j]
-      |]
-    |]
 
-let mtx = readIntMatrix path // mtx
+let mtx = readIntMatrix path
 
 
 [<Tests>]

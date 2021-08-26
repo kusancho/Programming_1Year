@@ -17,6 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="writePrint.fs" />
     <None Include="App.config" />
     <Compile Include="Generator.fs" />
     <Compile Include="Main.fs" />
