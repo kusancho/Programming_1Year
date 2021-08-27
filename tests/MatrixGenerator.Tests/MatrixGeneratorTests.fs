@@ -1,21 +1,23 @@
 module MatrixGeneratorTests
 
 open Expecto
+open Generator
 open writePrint
 
 
-// CONFIG - sparsity: 0.2 lineSize: 100 colSize: 100 amount: 1
 let path = __SOURCE_DIRECTORY__ + "/Matrix0.txt"
 
 let sparsity, colSize, lineSize = 0.2, 100, 100
 
-
-let mtx = readIntMatrix path
+let config = GeneratorConfig(Int, 100, 100, 0.2, 1, __SOURCE_DIRECTORY__)
 
 
 [<Tests>]
 let testSparseMatrix =
     testList "MatrixGenerator" [
+
+            generateMatrix config
+            let mtx = readIntMatrix path
 
             testCase "sparsity" <| fun _ ->
                 let mutable nons = 0.

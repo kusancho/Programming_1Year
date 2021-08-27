@@ -243,10 +243,10 @@ var assemblies = [
   {
     "name": "MatrixGenerator",
     "classes": [
-      { "name": "Generator", "rp": "MatrixGenerator_Generator.htm", "cl": 0, "ucl": 15, "cal": 15, "tl": 39, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 25, "lch": [], "bch": [], "hc": [] },
-      { "name": "Main", "rp": "MatrixGenerator_Main.htm", "cl": 0, "ucl": 29, "cal": 29, "tl": 52, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 14, "lch": [], "bch": [], "hc": [] },
+      { "name": "Generator", "rp": "MatrixGenerator_Generator.htm", "cl": 15, "ucl": 0, "cal": 15, "tl": 39, "ct": "LineCoverage", "mc": "-", "cb": 13, "tb": 25, "lch": [], "bch": [], "hc": [] },
+      { "name": "MatrixGeneratorMain", "rp": "MatrixGenerator_MatrixGeneratorMain.htm", "cl": 0, "ucl": 29, "cal": 29, "tl": 52, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 14, "lch": [], "bch": [], "hc": [] },
       { "name": "System.AssemblyVersionInformation", "rp": "MatrixGenerator_AssemblyVersionInformation.htm", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "writePrint", "rp": "MatrixGenerator_writePrint.htm", "cl": 10, "ucl": 4, "cal": 14, "tl": 24, "ct": "LineCoverage", "mc": "-", "cb": 5, "tb": 14, "lch": [], "bch": [], "hc": [] },
+      { "name": "writePrint", "rp": "MatrixGenerator_writePrint.htm", "cl": 14, "ucl": 0, "cal": 14, "tl": 24, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 14, "lch": [], "bch": [], "hc": [] },
     ]},
   {
     "name": "seventhHomework",
@@ -295,7 +295,7 @@ var riskHotspots = [
     "metrics": [
       { "value": 16, "exceeded": false },
       { "value": 3072, "exceeded": true },
-      { "value": 0, "exceeded": false },
+      { "value": 16, "exceeded": true },
     ]},
   {
     "assembly": "homework", "class": "homework.matrixes", "reportPath": "homework_matrixes.htm", "methodName": "System.Int32[][] homework.matrixes::multiplyMartix(System.Int32[][],System.Int32[][])", "methodShortName": "multiplyMartix(...)", "fileIndex": 0, "line": 19,
@@ -324,6 +324,13 @@ var riskHotspots = [
       { "value": 9, "exceeded": false },
       { "value": 256, "exceeded": true },
       { "value": 0, "exceeded": false },
+    ]},
+  {
+    "assembly": "MatrixGenerator", "class": "writePrint", "reportPath": "MatrixGenerator_writePrint.htm", "methodName": "System.Int32 writePrint/lst@9::GenerateNext(System.Collections.Generic.IEnumerable`1<System.String>&)", "methodShortName": "GenerateNext(...)", "fileIndex": 0, "line": 9,
+    "metrics": [
+      { "value": 17, "exceeded": false },
+      { "value": 8, "exceeded": false },
+      { "value": 17, "exceeded": true },
     ]},
 ];
 
