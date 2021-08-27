@@ -1,12 +1,8 @@
 module NFA
 
-(*
-open advancedMatrix
-
 
 type ISmb<'t> =
     abstract PrettyString: string
-
 
 
 type Smb<'t> =
@@ -18,7 +14,7 @@ type Smb<'t> =
             | Eps -> "Eps"
             | Smb t -> t.ToString()
 
-
+(*
 type NFA<'t> =
     val StartState: int
     val FinalState: int
