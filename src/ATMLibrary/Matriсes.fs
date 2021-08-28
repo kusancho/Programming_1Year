@@ -32,7 +32,9 @@ type QuadTreeMtx<'t, 'a when 't: equality> =
         member this.Item
             with get (i, j) =
                 this.tree.getByIndex i j
-            and set (i, j) elem = failwith " "
+            and set (i, j) toSet =
+                QuadTreeMtx(extendedTree.mapi (fun a b elem -> if i = b && j = b then toSet else elem) this.tree,
+                            this.algebraicStruct)
 
         member this.changeAlgebraicStruct algStr =
             QuadTreeMtx(this.tree, algStr) :> IMatrix<_>

@@ -47,8 +47,7 @@ type NFA<'t when 't: comparison> =
                                       (fun _ _ -> HashSet<_>()),
                                       algStrForSetsOp) :> IMatrix<_>
             //let mtx = Unchecked.defaultof<IMatrix<_>>
-            mtx
             nfa.Transitions
             |> List.iter (fun (s,l,f) -> mtx.[s,f].Add l |> ignore)
-            mtx.map
+            mtx.map (fun elem -> Set(elem))
         NFA<_> (HashSet<_>([nfa.StartState]), HashSet<_>([nfa.FinalState]), mtx)
