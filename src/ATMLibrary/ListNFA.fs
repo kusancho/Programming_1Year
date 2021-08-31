@@ -7,7 +7,7 @@ type NFASmb<'t> =
     | Smb of 't
 
 [<Struct>]
-type ListNFA<'t> =
+type ListNFA<'t when 't: comparison> =
     val StartState : int
     val FinalState : int
     val Transitions : list<int * NFASmb<'t> * int>

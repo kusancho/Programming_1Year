@@ -29,12 +29,12 @@ type QuadTreeMtx<'t, 'a when 't: equality> =
         member this.transitiveClosure algStr =
             QuadTreeMtx(this.tree.transitiveClosure algStr, algStr) :> IMatrix<_>
 
-        member this.Item
-            with get (i, j) =
-                this.tree.getByIndex i j
-            and set (i, j) toSet =
-                QuadTreeMtx(extendedTree.mapi (fun a b elem -> if i = b && j = b then toSet else elem) this.tree,
-                            this.algebraicStruct)
+        member this.get (i, j) =
+            this.tree.getByIndex i j
+
+        member this.set (i, j) toSet =
+            QuadTreeMtx(extendedTree.mapi (fun a b value -> if i = a && j = b then toSet else value) this.tree,
+                        this.algebraicStruct) :> IMatrix<_>
 
         member this.changeAlgebraicStruct algStr =
             QuadTreeMtx(this.tree, algStr) :> IMatrix<_>

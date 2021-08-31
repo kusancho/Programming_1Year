@@ -17,12 +17,12 @@
     
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ListNFA.fs" />
+    <Compile Include="RegExp.fs" />
     <Compile Include="interfaces.fs" />
     <Compile Include="Matriсes.fs" />
-    <Compile Include="ListNFA.fs" />
     <Compile Include="ATM.fs" />
     <Compile Include="NFA.fs" />
-    <Compile Include="RegExp.fs" />
     <Compile Include="TreeNFA.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>

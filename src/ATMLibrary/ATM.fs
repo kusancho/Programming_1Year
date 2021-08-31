@@ -7,9 +7,10 @@ open interfaces
 open AlgebraicStructure
 open ListNFA
 open QuadTree
+open Regexp
 
 
-type NFASmb<'t> =
+type NFASmb<'t when 't: comparison> =
     | Eps
     | Smb of 't
 
@@ -36,7 +37,7 @@ type NFA<'t when 't: comparison> =
         {StartState = start; FinalState = final; Transitions = transitions}
 
 
-    static member listNfaToNFA (nfa: ListNFA<_>) =
+    static member listNfaToNFA (nfa: ListNFA<'a>) =
         let mtx =
             let maxState =
                nfa.Transitions
@@ -44,10 +45,21 @@ type NFA<'t when 't: comparison> =
             let mtx = QuadTreeMtx(extendedTree.init
                                       (maxState + 1)
                                       (maxState + 1)
-                                      (fun _ _ -> HashSet<_>()),
+                                      (fun _ _ -> HashSet<'a>()),
                                       algStrForSetsOp) :> IMatrix<_>
             //let mtx = Unchecked.defaultof<IMatrix<_>>
             nfa.Transitions
-            |> List.iter (fun (s,l,f) -> mtx.[s,f].Add l |> ignore)
+            |> List.iter (fun (s,l,f) -> ((mtx.get(s, f)).Add l) |> ignore)
             mtx.map (fun elem -> Set(elem))
-        NFA<_> (HashSet<_>([nfa.StartState]), HashSet<_>([nfa.FinalState]), mtx)
+        NFA<_>(HashSet<_>([nfa.StartState]), HashSet<_>([nfa.FinalState]), mtx)
+
+
+    static member TreeNFAOfRegExp regexp =
+        NFA.listNfaToNFA <| regexpToListNFA regexp
+
+
+    static member seqToAtm (input: list<_>) =
+        let tree = QuadTreeMtx(extendedTree.init (input.Length + 1) (input.Length + 1)
+                                     (fun i j -> if i + 1 = j then Set([Smb input.[i]]) else Set.empty<_>),
+                                     algStrForSetsOp) :> IMatrix<_>
+        NFA(HashSet([0]), HashSet([input.Length]), tree)

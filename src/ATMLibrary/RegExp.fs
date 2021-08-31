@@ -12,7 +12,7 @@ type Regexp<'t> =
     | Star of Regexp<'t>
 
 
-let regexpToNFA regexp =
+let regexpToListNFA regexp =
     let rec _go curFreeState curRegexp =
         match curRegexp with
         | REps -> new ListNFA<_> (curFreeState, curFreeState + 1,

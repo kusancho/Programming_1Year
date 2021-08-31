@@ -17,7 +17,9 @@ type IMatrix<'t when 't: equality> =
 
     abstract member fold: ('a -> 't -> 'a) -> 'a -> 'a
 
-    abstract member Item: int * int -> 't with get, set
+    abstract member set: int * int -> 't -> IMatrix<'t>
+
+    abstract member get: int * int -> 't
 
     abstract member changeAlgebraicStruct: AlgebraicStruct<'a> -> IMatrix<'t>
 
