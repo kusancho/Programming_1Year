@@ -16,10 +16,12 @@ let config = GeneratorConfig(Int, 100, 100, 0.2, 1, __SOURCE_DIRECTORY__)
 let testSparseMatrix =
     testList "MatrixGenerator" [
 
-            generateMatrix config
-            let mtx = readIntMatrix path
+            let newMatrix =
+                generateMatrix config
+                readIntMatrix path
 
-            testCase "sparsity" <| fun _ ->
+            testProperty "sparsity" <| fun _ ->
+                let mtx = newMatrix
                 let mutable nons = 0.
                 let numOfElems = float <| mtx.Length * mtx.[0].Length
                 for i in 0 .. mtx.Length - 1 do
@@ -29,10 +31,12 @@ let testSparseMatrix =
                 Expect.equal (System.Math.Round(nons / numOfElems, 1)) sparsity ""
 
             testCase "colSize" <| fun _ ->
+                let mtx = newMatrix
                 let realColSize = mtx.[0].Length
                 Expect.equal realColSize colSize ""
 
             testCase "lineSize" <| fun _ ->
+                let mtx = newMatrix
                 let realLineSize = mtx.Length
                 Expect.equal realLineSize lineSize ""
 ]

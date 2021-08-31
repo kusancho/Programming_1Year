@@ -6,9 +6,7 @@
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
-        <Content Include="Matrix0.txt" />
         <Compile Include="MatrixGeneratorTests.fs" />
-        <Compile Include="GeneratorTests.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>

@@ -5,10 +5,13 @@ open System.IO
 
 
 let printMatrix (mtx: 't [,]) path =
+    if File.Exists path
+    then File.Delete path
     let strMtx = Array2D.map (fun elem -> elem.ToString()) mtx
-    let lst = [for i in 0 .. mtx.GetLength(1) - 1 do
-                   String.concat " " strMtx.[i, *] ]
-    File.WriteAllLines(path, lst)
+    let size = mtx.GetLength(1) - 1
+    for i in 0 .. size - 1 do
+        File.AppendAllText(path, String.concat " " strMtx.[i, *] + "\n")
+    File.AppendAllText(path, String.concat " " strMtx.[size, *])
 
 
 let readIntMatrix path =
