@@ -51,7 +51,7 @@ let nfaToTreeNFA (nfa: ListNFA<_>) =
     TreeNFA(HashSet([nfa.StartState]), HashSet([nfa.FinalState]), tree)
 
 
-//let TreeNFAOfRegExp regexp = nfaToTreeNFA <| regexpToNFA regexp
+let TreeNFAOfRegExp regexp = nfaToTreeNFA <| regexpToListNFA regexp
 
 
 let seqToAtm (input: list<_>) =

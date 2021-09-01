@@ -45,17 +45,13 @@ type NFA<'t when 't: comparison> =
             let mtx = QuadTreeMtx(extendedTree.init
                                       (maxState + 1)
                                       (maxState + 1)
-                                      (fun _ _ -> HashSet<'a>()),
+                                      (fun _ _ -> HashSet<_>()),
                                       algStrForSetsOp) :> IMatrix<_>
             //let mtx = Unchecked.defaultof<IMatrix<_>>
             nfa.Transitions
             |> List.iter (fun (s,l,f) -> ((mtx.get(s, f)).Add l) |> ignore)
-            mtx.map (fun elem -> Set(elem))
+            mtx.map (fun elem -> Set(elem)) :> IMatrix<_>
         NFA<_>(HashSet<_>([nfa.StartState]), HashSet<_>([nfa.FinalState]), mtx)
-
-
-    static member TreeNFAOfRegExp regexp =
-        NFA.listNfaToNFA <| regexpToListNFA regexp
 
 
     static member seqToAtm (input: list<_>) =
@@ -63,3 +59,42 @@ type NFA<'t when 't: comparison> =
                                      (fun i j -> if i + 1 = j then Set([Smb input.[i]]) else Set.empty<_>),
                                      algStrForSetsOp) :> IMatrix<_>
         NFA(HashSet([0]), HashSet([input.Length]), tree)
+
+
+    static member NFAOfRegexp regexp =
+        NFA<_>.listNfaToNFA <| regexpToListNFA regexp
+
+
+    member this.toDot outFile =
+
+        let header =
+            [
+                "digraph nfa"
+                "{"
+                "rankdir = LR"
+                "node [shape = circle];"
+                for s in this.StartState do
+                    sprintf "%A[shape = circle, label = \"%A_Start\"]" s s
+            ]
+
+        let footer =
+            [
+                 for s in this.FinalState do
+                    sprintf "%A[shape = doublecircle]" s
+                 "}"
+            ]
+
+        let content =
+            .Transitions
+            |> Array2D.mapi (
+                fun s f t ->
+                    t
+                    |> Seq.map (fun t ->
+                        sprintf
+                            "%A -> %A [label = \"%s\"]"
+                            s
+                            f
+                            (match t with Eps -> "Eps" | Smb t -> sprintf "%A" t)))
+            |> fun a ->  a |> Seq.cast<_> |> Seq.collect id |> Seq.toList
+
+        System.IO.File.WriteAllLines (outFile, header @ content @ footer)
