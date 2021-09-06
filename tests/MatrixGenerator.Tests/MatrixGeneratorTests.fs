@@ -11,15 +11,14 @@ let sparsity, colSize, lineSize = 0.2, 100, 100
 
 let config = GeneratorConfig(Int, 100, 100, 0.2, 1, __SOURCE_DIRECTORY__)
 
+let newMatrix =
+    generateMatrix config
+    readIntMatrix path
+
 
 [<Tests>]
 let testSparseMatrix =
     testList "MatrixGenerator" [
-
-            let newMatrix =
-                generateMatrix config
-                readIntMatrix path
-
             testProperty "sparsity" <| fun _ ->
                 let mtx = newMatrix
                 let mutable nons = 0.
