@@ -4,19 +4,10 @@ module writePrint
 open System.IO
 
 
-let printMatrix (mtx: seq<seq<'t>>) path =
-    let size = Seq.length mtx - 1
-    let writeToFile str =
-        File.AppendAllText(path, str)
-
-    let space cntr =
-        if cntr <> size then " " else ""
-
+let printMatrix (mtx: seq<seq<string>>) path =
     if File.Exists path
     then File.Delete path
-    for s in mtx do
-        Seq.iteri (fun i symb -> writeToFile <| (symb.ToString() + space i)) s
-        writeToFile "\n"
+    File.WriteAllLines(path, Seq.map (fun seq -> String.concat " " seq) mtx)
 
 
 let readIntMatrix path =
