@@ -6,16 +6,16 @@ open interfaces
 open AlgebraicStructure
 
 
-type QuadTreeMtx<'t, 'a when 't: equality> =
+type QuadTreeMtx<'t when 't: equality> =
     val tree: extendedTree<'t>
-    val algebraicStruct: AlgebraicStruct<'a>
+    val algebraicStruct: AlgebraicStruct<'t>
 
     interface IMatrix<'t> with
         member this.iteri func =
             extendedTree.iteri func this.tree
 
         member this.map func =
-            QuadTreeMtx(extendedTree.map func this.tree, this.algebraicStruct) :> IMatrix<_>
+            QuadTreeMtx(extendedTree.map func this.tree, this.algebraicStruct) :> IMatrix<'t>
 
         member this.mapi func =
             QuadTreeMtx(extendedTree.mapi func this.tree, this.algebraicStruct) :> IMatrix<_>

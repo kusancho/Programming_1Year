@@ -22,7 +22,6 @@
     <Compile Include="interfaces.fs" />
     <Compile Include="Matriсes.fs" />
     <Compile Include="ATM.fs" />
-    <Compile Include="NFA.fs" />
     <Compile Include="TreeNFA.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>

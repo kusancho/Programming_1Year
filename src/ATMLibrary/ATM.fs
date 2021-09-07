@@ -37,7 +37,7 @@ type NFA<'t when 't: comparison> =
         {StartState = start; FinalState = final; Transitions = transitions}
 
 
-    static member listNfaToNFA (nfa: ListNFA<'a>) =
+    static member listNFAToNFA (nfa: ListNFA<'t>) =
         let mtx =
             let maxState =
                nfa.Transitions
@@ -46,12 +46,11 @@ type NFA<'t when 't: comparison> =
                                       (maxState + 1)
                                       (maxState + 1)
                                       (fun _ _ -> HashSet<_>()),
-                                      algStrForSetsOp) :> IMatrix<_>
-            //let mtx = Unchecked.defaultof<IMatrix<_>>
+                                      algStrForSetsOp) :> IMatrix<'t>
             nfa.Transitions
             |> List.iter (fun (s,l,f) -> ((mtx.get(s, f)).Add l) |> ignore)
-            mtx.map (fun elem -> Set(elem)) :> IMatrix<_>
-        NFA<_>(HashSet<_>([nfa.StartState]), HashSet<_>([nfa.FinalState]), mtx)
+            mtx.map Set
+        NFA<_>(HashSet<_>(nfa.StartState), HashSet<_>(nfa.FinalState), mtx)
 
 
     static member seqToAtm (input: list<_>) =
@@ -62,7 +61,7 @@ type NFA<'t when 't: comparison> =
 
 
     static member NFAOfRegexp regexp =
-        NFA<_>.listNfaToNFA <| regexpToListNFA regexp
+        NFA<_>.listNFAToNFA <| regexpToListNFA regexp
 
 
     member this.toDot outFile =
