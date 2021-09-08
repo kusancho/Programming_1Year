@@ -5,8 +5,6 @@ open System.IO
 
 
 let printMatrix (mtx: seq<seq<string>>) path =
-    if File.Exists path
-    then File.Delete path
     File.WriteAllLines(path, Seq.map (fun seq -> String.concat " " seq) mtx)
 
 
