@@ -11,7 +11,7 @@ let path = __SOURCE_DIRECTORY__ + "/Matrix0.txt"
 
 let newConfig size =
     match size with
-    | line, col, sparsity -> GeneratorConfig(Int, line, col, sparsity % 1., 1, __SOURCE_DIRECTORY__)
+    | line, col, sparsity -> GeneratorConfig(Int, line, col, sparsity, 1, __SOURCE_DIRECTORY__)
 
 
 let newMatrix config =
@@ -28,7 +28,7 @@ let testSparseMatrix =
                     | a, b, c ->
                         abs a + 100,
                         abs b + 100,
-                        ((abs c + 3) |> float) * 0.1 % 1. 
+                        ((abs c + 3) |> float) * 0.1 % 1.
                 let mtx = newMatrix <| newConfig (lineSize, colSize, sparsity)
                 let realColSize = mtx.[0].Length
                 let realLineSize = mtx.Length
