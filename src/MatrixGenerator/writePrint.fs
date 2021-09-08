@@ -5,7 +5,7 @@ open System.IO
 
 
 let printMatrix (mtx: seq<seq<string>>) path =
-    File.WriteAllLines(path, Seq.map (String.concat "") mtx)
+    File.WriteAllLines(path, Seq.map (String.concat " ") mtx)
 
 
 let readIntMatrix path =
