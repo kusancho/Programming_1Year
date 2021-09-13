@@ -185,6 +185,12 @@ type extendedTree<'t when 't: equality> =
         go 0 (size - 1) 0 (size - 1) this.tree
 
 
+    member this.setByIndex i j value algStr =
+        let lstMtx = this.toSparseMatrix
+        SparseMatrix(lstMtx.lineSize, lstMtx.colSize, lstMtx.content @ [Cell(i, j, value)])
+        |> extendedTree.createTreeOfSparseMatrix algStr
+
+
     static member iteri (func: int -> int -> 't -> unit) (tree: extendedTree<'t>) =
         let size = tree.specSize
         let rec go lineH lineL colH colL tree =

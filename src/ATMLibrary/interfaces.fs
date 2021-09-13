@@ -4,7 +4,7 @@ module interfaces
 open AlgebraicStructure
 
 
-type IMatrix<'t when 't: equality> =
+type IMatrix<'t> =
     abstract member map: ('t -> 'a) -> IMatrix<'a>
 
     abstract member iteri: (int -> int -> 't -> unit) -> unit
@@ -21,10 +21,8 @@ type IMatrix<'t when 't: equality> =
 
     abstract member get: int * int -> 't
 
-    abstract member changeAlgebraicStruct: AlgebraicStruct<'a> -> IMatrix<'t>
+    abstract member tensorMultiply: IMatrix<'t> -> AlgebraicStruct<'t> -> IMatrix<'t>
 
+    abstract member lineSize: int
 
-
-
-
-
+    abstract member colSize: int

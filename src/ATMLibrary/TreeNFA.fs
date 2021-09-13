@@ -146,9 +146,9 @@ let epsClosure (atm: TreeNFA<_>) =
     res
 
 
-let intersect fst snd =
+let intersect fst snd algStr =
     let monoid =
-        match algStrForSetsOp with
+        match algStr with
         | SemiRing x -> x.Monoid
         | _ -> failwith "cannot multiply in monoid"
 
@@ -167,7 +167,7 @@ let accept (nfaTree: TreeNFA<_>) (input: list<_>) =
 
     let eCls = epsClosure nfaTree
 
-    let intersection = intersect eCls.Transitions nfa2Tree.Transitions
+    let intersection = intersect eCls.Transitions nfa2Tree.Transitions algStrForSetsOp
 
     let newStartState =
         [ for s1 in nfa2Tree.StartState do

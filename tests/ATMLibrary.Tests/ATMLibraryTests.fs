@@ -22,26 +22,17 @@ let testTree =
     testList "ATMs functions" [
 
 //        testCase "seq to ATM" <| fun _ ->
-//            let atm = seqToAtm str
-//            let trans = SparseMatrix.toListOfCells <| atm.Transitions.toSparseMatrix
+//            let atm = NFA<_>.seqToAtm str
+//            let hs = HashSet<_>()
+//            atm.Transitions.iteri (fun i j elem -> if elem = Set.empty then () else hs.Add((i, j,  elem)) |> ignore)
 //            let origTrans = Set([(0, 1, Set([Smb 't'])); (1, 2, Set([Smb 'e']))
 //                                 (2, 3, Set([Smb 's'])); (3, 4, Set([Smb 't']))])
-//            Expect.equal (Set(trans)) origTrans " "
-
-
-        testCase "seq to ATM1" <| fun _ ->
-            let atm = NFA<_>.seqToAtm str
-            let hs = HashSet<_>()
-            atm.Transitions.iteri (fun i j elem -> if elem = Set.empty then () else hs.Add((i, j,  elem)) |> ignore)
-            let origTrans = Set([(0, 1, Set([Smb 't'])); (1, 2, Set([Smb 'e']))
-                                 (2, 3, Set([Smb 's'])); (3, 4, Set([Smb 't']))])
-            Expect.equal (Set(hs)) origTrans " "
+//            Expect.equal (Set(hs)) origTrans " "
 
 
         testCase "NFA of ListNFA" <| fun _ ->
-            let atm = NFA<_>.NFAOfRegexp <| Star(Alt(RSmb '1', RSmb '0'))
-
-            Expect.equal " " " " ""
+            let atm = TreeNFAOfRegExp <| Star(Alt(RSmb '1', RSmb '0'))
+            Expect.equal (accept atm binStr1) true ""
 
 
         testCase "accept #1" <| fun _ ->

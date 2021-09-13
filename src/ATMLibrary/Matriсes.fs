@@ -6,38 +6,25 @@ open interfaces
 open AlgebraicStructure
 
 
-type QuadTreeMtx<'t when 't: equality> =
-    val tree: extendedTree<'t>
-    val algebraicStruct: AlgebraicStruct<'t>
+type QuadTreeMtx<'a, 't when 't: equality> =
+    val mtx: extendedTree<'t>
+    val algStr: AlgebraicStruct<'a>
+
+    new(lineSize, colSize, func, algStr) = {mtx = extendedTree.init lineSize colSize func; algStr = algStr}
 
     interface IMatrix<'t> with
-        member this.iteri func =
-            extendedTree.iteri func this.tree
+        member this.fold(var0) (var1) = failwith "todo"
+        member this.get(var0, var1) = failwith "todo"
+        member this.iteri(var0) = failwith "todo"
+        member this.map(var0) = failwith "todo"
+        member this.mapi(var0) = failwith "todo"
+        member this.set(var0, var1) (var2) = failwith "todo"
+        member this.tensorMultiply(var0) (var1) = failwith "todo"
+        member this.toBool(var0) = failwith "todo"
+        member this.transitiveClosure(var0) = failwith "todo"
+        member this.colSize = failwith "todo"
 
-        member this.map func =
-            QuadTreeMtx(extendedTree.map func this.tree, this.algebraicStruct) :> IMatrix<'t>
-
-        member this.mapi func =
-            QuadTreeMtx(extendedTree.mapi func this.tree, this.algebraicStruct) :> IMatrix<_>
-
-        member this.fold func acc =
-            extendedTree.fold func acc this.tree
-
-        member this.toBool algStr =
-            QuadTreeMtx(extendedTree.toBoolTree this.tree, algStr) :> IMatrix<_>
-
-        member this.transitiveClosure algStr =
-            QuadTreeMtx(this.tree.transitiveClosure algStr, algStr) :> IMatrix<_>
-
-        member this.get (i, j) =
-            this.tree.getByIndex i j
-
-        member this.set (i, j) toSet =
-            QuadTreeMtx(extendedTree.mapi (fun a b value -> if i = a && j = b then toSet else value) this.tree,
-                        this.algebraicStruct) :> IMatrix<_>
-
-        member this.changeAlgebraicStruct algStr =
-            QuadTreeMtx(this.tree, algStr) :> IMatrix<_>
+        member this.lineSize = failwith "todo"
 
 
-    new(tree, algStr) = {tree = tree; algebraicStruct = algStr}
+
