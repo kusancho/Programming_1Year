@@ -6,15 +6,19 @@ open Generator
 open writePrint
 
 
-let path = __SOURCE_DIRECTORY__ + "/Matrix0.txt"
+let fileName = "/Matrix0.txt"
+let pathSparsity = __SOURCE_DIRECTORY__ + "/sparsity"
+let pathLineSize = __SOURCE_DIRECTORY__ + "/lineSize"
+let pathColSize = __SOURCE_DIRECTORY__ + "/colSize"
 
 
-let newConfig lineSize colSize sparsity = GeneratorConfig(Int, lineSize, colSize, sparsity, 1, __SOURCE_DIRECTORY__)
+let newConfig lineSize colSize sparsity path = GeneratorConfig(Int, lineSize, colSize, sparsity, 1, path)
 
 
-let newMatrix config =
+let newMatrix config path =
     generateMatrix config
     readIntMatrix path
+
 
 let evaluateSparsity (mtx: int[][]) =
     let mutable nons = 0.
@@ -26,19 +30,33 @@ let evaluateSparsity (mtx: int[][]) =
     nons / numOfElems
 
 
+let argsToNormal a b c =
+    abs a + 100, abs b + 100, ((abs c + 13) |> float) * 0.1 % 1.
+
+
 [<Tests>]
 let testSparseMatrix =
     testList "MatrixGenerator" [
-            testProperty "line size, col size, sparsity" <| fun (a: int, b: int, c: int) ->
-                let lineSize, colSize, sparsity = abs a + 1000, abs b + 1000, ((abs c + 13) |> float) * 0.1 % 1.
-                let mtx = newMatrix <| newConfig lineSize colSize sparsity
-                let realColSize = mtx.[0].Length
+            testProperty "sparsity" <| fun (a: int, b: int, c: int) ->
+                let lineSize, colSize, sparsity = argsToNormal a b c
+                let mtx = newMatrix (newConfig lineSize colSize sparsity pathSparsity) <| pathSparsity + fileName
+                Expect.equal (sparsity - 0.05 <= Math.Round(evaluateSparsity mtx, 6)
+                              && Math.Round(evaluateSparsity mtx, 6) <= sparsity + 0.05)
+                               true
+                               "sparsity does not converge"
+
+
+            testProperty "line size" <| fun (a: int, b: int, c: int) ->
+                let lineSize, colSize, sparsity = argsToNormal a b c
+                let mtx = newMatrix (newConfig lineSize colSize sparsity pathLineSize) <| pathLineSize + fileName
                 let realLineSize = mtx.Length
-
-                Expect.equal (Math.Round(evaluateSparsity mtx, 2)) (Math.Round(sparsity, 2)) "sparsity does not converge"
-
-                Expect.equal realColSize colSize "line size does not converge"
-
                 Expect.equal realLineSize lineSize "col size does not converge"
+
+
+            testProperty "col size" <| fun (a: int, b: int, c: int) ->
+                let lineSize, colSize, sparsity = argsToNormal a b c
+                let mtx = newMatrix (newConfig lineSize colSize sparsity pathColSize) <| pathColSize + fileName
+                let realColSize = mtx.[0].Length
+                Expect.equal realColSize colSize "line size does not converge"
 ]
 
