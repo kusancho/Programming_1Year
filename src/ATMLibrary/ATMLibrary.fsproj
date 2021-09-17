@@ -24,6 +24,8 @@
     <Compile Include="ATM.fs" />
     <Compile Include="TreeNFA.fs" />
     <Compile Include="Main.fs" />
+    <Compile Include="AbstractClass.fs" />
+    <Compile Include="QTMatrix.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />

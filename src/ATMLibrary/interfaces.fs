@@ -2,9 +2,14 @@ module interfaces
 
 
 open AlgebraicStructure
+open QuadTree
 
+// add there to .......
+type support<'t when 't: equality> =
+    | ExtendedTree of extendedTree<'t>
 
-type IMatrix<'t> =
+type IMatrix<'t when 't: equality> =
+    abstract member extendedTree: extendedTree<'t>
     abstract member map: ('t -> 'a) -> IMatrix<'a>
 
     abstract member iteri: (int -> int -> 't -> unit) -> unit
@@ -13,11 +18,11 @@ type IMatrix<'t> =
 
     abstract member transitiveClosure: AlgebraicStruct<'t> -> IMatrix<'t>
 
-    abstract member toBool: AlgebraicStruct<bool> -> IMatrix<bool>
+    abstract member toBool: IMatrix<bool>
 
-    abstract member fold: ('a -> 't -> 'a) -> 'a -> 'a
+    abstract member fold: ('g -> 't -> 'g) -> 'g -> 'g
 
-    abstract member set: int * int -> 't -> IMatrix<'t>
+    abstract member set: int * int -> 't -> AlgebraicStruct<'t> -> IMatrix<'t>
 
     abstract member get: int * int -> 't
 

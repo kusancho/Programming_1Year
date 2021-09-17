@@ -3,6 +3,7 @@ module ATM
 
 open System.Collections.Generic
 open Matriсes
+open QuadTree
 open interfaces
 open AlgebraicStructure
 open ListNFA
@@ -25,7 +26,7 @@ let algStrForSetsOp<'t when 't: comparison> = SemiRing(new SemiRing<Set<NFASmb<'
 type NFA<'t when 't: comparison> =
     val StartState : HashSet<int>
     val FinalState : HashSet<int>
-    val Transitions : IMatrix<Set<NFASmb<'t>>>
+    val Transitions : IMatrix<Set<NFASmb<'t>>, Set<NFASmb<'t>>>
     val AlgebraicStruct: AlgebraicStruct<Set<NFASmb<'t>>>
     new (start, final, transitions, algStruct) =
         {StartState = start; FinalState = final; Transitions = transitions; AlgebraicStruct = algStruct}
@@ -118,20 +119,19 @@ type NFA<'t when 't: comparison> =
                 ListNFA<_> (newStart, newFinal, transitions)
 
         let atm = _go 0 regexp
-        let mtx = QuadTreeMtx(atm.FinalState + 1, atm.FinalState + 1, (fun _ _ -> HashSet()), algStrForSetsOp) :> IMatrix<_>
+        let mtx = QuadTreeMtx(extendedTree.init (atm.FinalState + 1) (atm.FinalState + 1) (fun _ _ -> HashSet())) :> IMatrix<_, _>
         List.iter (fun elem -> let a, b, c = elem
                                mtx.get(a, c).Add b |> ignore) atm.Transitions
         NFA(HashSet(atm.StartState), HashSet(atm.FinalState), mtx.map Set, algStrForSetsOp)
 
 
     static member seqToAtm (input: list<_>) =
-        let tree = QuadTreeMtx(input.Length + 1, input.Length + 1,
-                                     (fun i j -> if i + 1 = j then Set([Smb input.[i]]) else Set.empty<_>),
-                                     algStrForSetsOp) :> IMatrix<_>
+        let tree = QuadTreeMtx(extendedTree.init (input.Length + 1) (input.Length + 1)
+                                     (fun i j -> if i + 1 = j then Set([Smb input.[i]]) else Set.empty<_>)) :> IMatrix<_, _>
         NFA(HashSet([0]), HashSet([input.Length]), tree, algStrForSetsOp)
 
 
-    static member intersect (fst: IMatrix<_>) (snd: IMatrix<_>) =
+    static member intersect (fst: IMatrix<_, _>) (snd: IMatrix<_, _>) =
         let monoid =
             match algStrForSetsOp with
             | SemiRing x -> x.Monoid
@@ -174,8 +174,7 @@ type NFA<'t when 't: comparison> =
 
         reachableFromStart |> Seq.iteri (fun i x -> newStateToOldState.Add (i, x)) // (new, old)
 
-        let tree = QuadTreeMtx(newStateToOldState.Count, newStateToOldState.Count,
-                       (fun _ _ -> Set.empty<_>), algStrForSetsOp) :> IMatrix<_>
+        let tree = QuadTreeMtx(extendedTree.init newStateToOldState.Count newStateToOldState.Count (fun _ _ -> Set.empty<_>)) :> IMatrix<_, _>
 
         let newTransitions =
             // fil neutral
