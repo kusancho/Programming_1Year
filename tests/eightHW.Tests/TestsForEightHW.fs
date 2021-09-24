@@ -82,7 +82,7 @@ let testTree =
             let sparse = randomIntSparseMatrix (size + 10) size
             let tree = extendedTree.createTreeOfSparseMatrix monoid sparse
             let arr = genArrayBySparseMatrix sparse
-            Expect.equal (genArrayBySparseMatrix <| extendedTree.toSparseMatrix tree) arr " "
+            Expect.equal (genArrayBySparseMatrix <| tree.toSparseMatrix) arr " "
 
 
         testProperty "autoTests tensorMultiply" <| fun (x1: int) (x2: int)  ->
@@ -93,8 +93,8 @@ let testTree =
             Expect.equal
                 (tensor mtx1 mtx2)
                 (genArrayBySparseMatrix
-                (extendedTree.toSparseMatrix
-                (extendedTree.tensorMultiply (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx1) (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx2) semiRingAlg))) ""
+                ((extendedTree.createTreeOfSparseMatrix semiRingAlg mtx1).tensorMultiply
+                     (extendedTree.createTreeOfSparseMatrix semiRingAlg mtx2) semiRingAlg).toSparseMatrix) ""
 
 
         testProperty "autoTests sum" <| fun (x: int) ->
@@ -103,7 +103,7 @@ let testTree =
             let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
             let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
             let sumArr = arrSum fArr sArr
-            let sparseSum = extendedTree.toSparseMatrix <| extendedTree.sumExTree fTree sTree monoid
+            let sparseSum = (fTree.plus sTree monoid).toSparseMatrix
             Expect.equal (genArrayBySparseMatrix sparseSum) sumArr
 
 
@@ -114,7 +114,7 @@ let testTree =
             let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
             let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
             let multArr = matrixMultiply fArr sArr
-            let sparseMult = extendedTree.toSparseMatrix <| extendedTree.multiply fTree sTree semiRingAlg
+            let sparseMult = (fTree.multiply sTree semiRingAlg).toSparseMatrix
             Expect.equal (genArrayBySparseMatrix sparseMult) multArr
 
 
@@ -129,23 +129,23 @@ let testTree =
 
 
         testCase "sum of Trees" <| fun _ ->
-            Expect.equal (quadTree.sum fst snd monoid) sum ""
+            Expect.equal (fst.plus snd monoid) sum ""
 
 
         testCase "sum of Trees #2" <| fun _ ->
-            Expect.throws (fun _ -> quadTree.sum fst errorTree monoid |> ignore) ""
+            Expect.throws (fun _ -> fst.plus errorTree monoid |> ignore) ""
 
 
         testCase "reduce" <| fun _ ->
-            Expect.equal (quadTree.reduce forReduce 1 2) (Leaf 1) ""
+            Expect.equal (forReduce.reduce 1 2) (Leaf 1) ""
 
 
         testCase "scalarMultiply #1" <| fun _ ->
-            Expect.equal (quadTree.scalarMultiply fst 0 semiRing.Mul semiRing.Monoid.Neutral) None ""
+            Expect.equal (fst.scalarMultiply 0 semiRing.Mul semiRing.Monoid.Neutral) None ""
 
 
         testCase "scalarMultiply #2" <| fun _ ->
-            Expect.equal (quadTree.scalarMultiply fst -2 semiRing.Mul semiRing.Monoid.Neutral) (Node(Leaf(14),  Leaf(20),      Leaf(-20),  Leaf(20)))  ""
+            Expect.equal (fst.scalarMultiply -2 semiRing.Mul semiRing.Monoid.Neutral) (Node(Leaf(14),  Leaf(20),      Leaf(-20),  Leaf(20)))  ""
 
 
         testCase "align" <| fun _ ->
@@ -154,14 +154,14 @@ let testTree =
 
 
         testCase "multiply" <| fun _ ->
-            Expect.equal (extendedTree.multiply fstMultTree sndMultTree (SemiRing(semiRing))) resMultTree ""
+            Expect.equal (fstMultTree.multiply sndMultTree (SemiRing(semiRing))) resMultTree ""
 
 
         testCase "tensorMultiply" <| fun _ ->
             let fst = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 1, [Cell(0, 0, 1)]))
             let snd = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(2, 2, [Cell(0, 0, 10); Cell(1, 0, 10)]))
             let res = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(2, 2, [Cell(0, 0, 10); Cell(1, 0, 10)]))
-            Expect.equal (extendedTree.tensorMultiply fst snd (SemiRing(semiRing))) res ""
+            Expect.equal (fst.tensorMultiply snd (SemiRing(semiRing))) res ""
              ]
 
 

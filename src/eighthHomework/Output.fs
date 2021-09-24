@@ -5,6 +5,7 @@ open System
 open QuadTree
 open System.IO
 open SparseMatrix
+open AlgebraicStructure
 
 
 let readToSparseMatrix path  =
@@ -32,13 +33,13 @@ let toBoolSparse (sparse: SparseMatrix<string>) =
     SparseMatrix(temp.lineSize, temp.colSize, List.filter (fun cell -> cell.data <> 1) temp.content)
 
 
-let extTreeToDotAfterTrClosure outFile (exTree: extendedTree<int>) =
+let extTreeToDotAfterTrClosure outFile (exTree: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) =
     let numberOfVertexes = max exTree.lineSize exTree.colSize
-    let arrOfVertexes = Array.init numberOfVertexes (id)
-    let localFun lst =  List.map (fun (x, y, z) -> (x, y)) lst
-    let originalLst = localFun (exTree |> extendedTree.toSparseMatrix |> SparseMatrix.toListOfCells)
-    let closedLst = localFun (extendedTree.transitiveClosure exTree |> extendedTree.toSparseMatrix |> SparseMatrix.toListOfCells)
-    let remainedLst = List.filter (fun x -> not (List.contains x originalLst)) closedLst
+    let arrOfVertexes = Array.init numberOfVertexes id
+    let originalLst = exTree.toSparseMatrix |> SparseMatrix.toListOfCells
+    let originCort = List.map (fun (x, y, z) -> (x, y)) originalLst
+    let closedLst = (exTree.transitiveClosure algStruct).toSparseMatrix |> SparseMatrix.toListOfCells
+    let remainedLst = List.filter (fun (x, y, _) -> not (List.contains (x, y) originCort)) closedLst
     let head = ["digraph transitiveClosure"
                 "{" ]
 
@@ -51,9 +52,9 @@ let extTreeToDotAfterTrClosure outFile (exTree: extendedTree<int>) =
 
     let originalTransitions =
      [
-        for (x, y) in originalLst ->
+        for (x, y, z) in originalLst ->
             sprintf
-                "%A -> %A" x y
+                "%A -> %A [label = \"%A\"]" x y z
      ]
 
     let endLst =
@@ -63,9 +64,9 @@ let extTreeToDotAfterTrClosure outFile (exTree: extendedTree<int>) =
 
     let newTransitions =
         [
-            for (x, y) in remainedLst ->
+            for (x, y, z) in remainedLst ->
                 sprintf
-                    "%A -> %A [color = red]" x y
+                    "%A -> %A [color = red] [label = \"%A\"]" x y z
         ]
 
     File.WriteAllLines (outFile, head @ vertexes @ originalTransitions @ newTransitions @ endLst )
