@@ -2,7 +2,7 @@ module MatrixBuilder
 
 
 open Interfaces
-open QTMatrix
+open QuadTree
 
 
 type ImplementingIMatrix<'t> =
