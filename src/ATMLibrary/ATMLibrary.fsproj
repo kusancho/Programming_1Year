@@ -17,15 +17,13 @@
     
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ListNFA.fs" />
     <Compile Include="RegExp.fs" />
     <Compile Include="interfaces.fs" />
-    <Compile Include="Matriсes.fs" />
-    <Compile Include="ATM.fs" />
-    <Compile Include="TreeNFA.fs" />
-    <Compile Include="Main.fs" />
-    <Compile Include="AbstractClass.fs" />
     <Compile Include="QTMatrix.fs" />
+    <Compile Include="MatrixBuilder.fs" />
+    <Compile Include="AlgebraicStructsForATM.fs" />
+    <Compile Include="ATM.fs" />
+    <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />

@@ -1,9 +1,6 @@
 module Regexp
 
 
-open ListNFA
-
-
 type Regexp<'t> =
     | REps
     | RSmb of 't
@@ -12,12 +9,26 @@ type Regexp<'t> =
     | Star of Regexp<'t>
 
 
+type NFASmb<'t> =
+    | Eps
+    | Smb of 't
+
+
+[<Struct>]
+type ListNFA<'t> =
+    val StartState : int
+    val FinalState : int
+    val Transitions : list<int * NFASmb<'t> * int>
+    new (start, final, transitions) =
+        {StartState = start; FinalState = final; Transitions = transitions}
+
+
 let regexpToListNFA regexp =
     let rec _go curFreeState curRegexp =
         match curRegexp with
-        | REps -> new ListNFA<_> (curFreeState, curFreeState + 1,
+        | REps -> ListNFA(curFreeState, curFreeState + 1,
                                 [ (curFreeState, Eps, curFreeState + 1) ])
-        | RSmb s -> new ListNFA<_> (curFreeState, curFreeState + 1,
+        | RSmb s -> ListNFA(curFreeState, curFreeState + 1,
                                 [ (curFreeState, Smb(s), curFreeState + 1) ])
         | Alt (l, r) ->
             let lAtm = _go curFreeState l
@@ -33,7 +44,7 @@ let regexpToListNFA regexp =
                 ]
                 @ rAtm.Transitions
                 @ lAtm.Transitions
-            new ListNFA<_> (newStart, newFinal, transitions)
+            ListNFA(newStart, newFinal, transitions)
 
         | Seq (l, r) ->
             let lAtm = _go curFreeState l
@@ -48,7 +59,7 @@ let regexpToListNFA regexp =
                 ]
                 @ rAtm.Transitions
                 @ lAtm.Transitions
-            new ListNFA<_> (newStart, newFinal, transitions)
+            ListNFA(newStart, newFinal, transitions)
 
         | Star r ->
             let newAtm = _go curFreeState r
@@ -62,7 +73,7 @@ let regexpToListNFA regexp =
                     (newFinal, Eps, newStart)
                 ]
                 @ newAtm.Transitions
-            ListNFA<_> (newStart, newFinal, transitions)
+            ListNFA(newStart, newFinal, transitions)
 
     _go 0 regexp
 

@@ -3,7 +3,7 @@ module QTMatrix
 open AlgebraicStructure
 open SparseMatrix
 open System.Collections.Generic
-open interfaces
+open Interfaces
 
 
 type quadTree<'t when 't: equality> =
@@ -77,7 +77,6 @@ let main =
     extTree |> ExtendedTree.map (fun x -> x) // <- `ExtendedTree` here is module that shadows the name of a class
 
 *)
-// todo: idea : instead of class this should be module
 // 2 parts of implementation:
 // 1) values like lineSize, colSize, ... -> type extended tree
 // 2) static members goes to module
@@ -179,8 +178,11 @@ type extendedTree<'t when 't: equality> =
         extendedTree.forceCreate <| SparseMatrix(this.lineSize, this.colSize, List.concat [contWithNeutrals; content])
 
 
-    /// if element is None, it will break
-    member this.getByIndex i j  =
+    member this.getByIndex i j algStr =
+        let neutral =
+            match algStr with
+            | Monoid x -> x.Neutral
+            | SemiRing x -> x.Monoid.Neutral
         let size = this.specSize
         if this.lineSize <= i || this.colSize <= j || i < 0 || j < 0
         then failwith "Index was outside the bounds of the array."
@@ -196,7 +198,7 @@ type extendedTree<'t when 't: equality> =
                 | i, j when i > lineHalf && j <= colHalf -> go (lineHalf + 1) lineL colH colHalf c
                 | i, j when i > lineHalf && j > colHalf -> go (lineHalf + 1) lineL (colHalf + 1) colL d
                 | _ -> failwith "Index was outside the bounds of the array."
-            | None -> failwith "read member description"
+            | None -> neutral
         go 0 (size - 1) 0 (size - 1) this.tree
 
 
@@ -394,8 +396,8 @@ type extendedTree<'t when 't: equality> =
         member this.fold acc func =
             extendedTree.fold acc func this
 
-        member this.get(i, j) =
-            this.getByIndex i j
+        member this.get(i, j, algStr) =
+            this.getByIndex i j algStr
 
         member this.iteri func =
             extendedTree.iteri func this
@@ -409,19 +411,15 @@ type extendedTree<'t when 't: equality> =
         member this.mapi func =
             extendedTree.mapi func this :> IMatrix<_>
 
-        member this.set(i, j) value algStr =
-            this.setByIndex i j value algStr :> IMatrix<_>
+        member this.tensorMultiply (snd: IMatrix<'t>) algStr =
+            match snd with
+            | :? extendedTree<'t> as x ->
+                extendedTree.tensorMultiply this x algStr :> IMatrix<_>
+            | _ -> failwith " "
 
-        member this.tensorMultiply snd algStr =
-            (*
-            let qt2 = snd.RealQuadtreeRef
-            Quadtree.tensorMultiply sr this.qt1 qt2
-            *)
-            extendedTree.tensorMultiply this (snd.extendedTree) algStr :> IMatrix<_>
-
-        member this.toBool =
-            extendedTree.toBoolTree this :> IMatrix<_>
+        member this.toBool neutral =
+            extendedTree.clearNeutral neutral this
+            |> extendedTree.toBoolTree :> IMatrix<_>
 
         member this.transitiveClosure algStr =
             this.transitiveClosure algStr :> IMatrix<_>
-
