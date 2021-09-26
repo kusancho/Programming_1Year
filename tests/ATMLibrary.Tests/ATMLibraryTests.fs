@@ -17,8 +17,8 @@ let binStr2 = ['1'; '0'; '1'; '3'] // acceptable for both
 let testTree =
     testList "ATMs functions" [
 
-        testCase "accept 1000 by (0, 1)*" <| fun _ ->
-            Expect.equal (accept fstAtm binStr1 (matrixBuilder QuadTree)) true ""
+//        testCase "accept 1000 by (0, 1)*" <| fun _ ->
+//            Expect.equal (accept fstAtm binStr1 (matrixBuilder QuadTree)) true ""
 
 
         testCase "accept 1000 by (0, 1)* + 3" <| fun _ ->

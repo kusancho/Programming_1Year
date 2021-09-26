@@ -5,7 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <RootNamespace>ATMLibrary</RootNamespace>
+    <RootNamespace>MatrixGenerator</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
     <Title>homework</Title>
@@ -17,16 +17,9 @@
     
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="RegExp.fs" />
-    <Compile Include="MatrixBuilder.fs" />
-    <Compile Include="AlgebraicStructsForATM.fs" />
-    <Compile Include="ATM.fs" />
-    <Compile Include="AssemblyInfo.fs" />
-    <None Include="App.config" />
+    <Compile Include="writePrint.fs" />
+    <Compile Include="Generator.fs" />
     <Compile Include="Main.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\eighthHomework\eighthHomework.fsproj" />
