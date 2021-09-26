@@ -21,7 +21,7 @@ let toDot (this: NFA<_>) outFile =
 
     let header =
         [
-            "graph nfa"
+            "digraph nfa"
             "{"
             "rankdir = LR"
             "node [shape = circle];"

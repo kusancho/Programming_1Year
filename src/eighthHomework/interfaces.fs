@@ -16,7 +16,7 @@ type IMatrix<'t when 't: equality> =
 
     abstract member toBool: 't -> IMatrix<bool>
 
-    abstract member fold: ('g -> 't -> 'g) -> 'g -> 'g
+    abstract member fold: ('acc -> 't -> 'acc) -> 'acc -> 'acc
 
     abstract member get: int * int * AlgebraicStruct<'t> -> 't
 

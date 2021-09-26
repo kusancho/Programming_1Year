@@ -65,7 +65,7 @@ type quadTree<'t when 't: equality> =
                      b.scalarMultiply scalar multOp neutral,
                      c.scalarMultiply scalar multOp neutral,
                      d.scalarMultiply scalar multOp neutral).noneCheck neutral
-            | Leaf(a) -> Leaf(multOp scalar a)
+            | Leaf(a) -> Leaf(multOp scalar a).noneCheck neutral
             | None -> None
 
 
@@ -333,7 +333,14 @@ type extendedTree<'t when 't: equality> =
                 Node((go a), (go b), (go c), (go d)).noneCheck neutral
             | Leaf a -> (snd.tree.scalarMultiply a multOp neutral).noneCheck neutral
             | None -> None
-        extendedTree(this.lineSize * snd.colSize, this.colSize * snd.colSize, go this.tree)
+
+        let lineDeviation = snd.specSize - snd.lineSize
+        let colDeviation = snd.specSize - snd.colSize
+        let tempSparse = extendedTree(this.lineSize * snd.specSize, this.colSize * snd.specSize, go this.tree).toSparseMatrix
+        let cells = List.map (fun (x: Cell<'t>) -> Cell(x.line - (x.line / snd.specSize) * lineDeviation,
+                                                    x.col - (x.col / snd.specSize) * colDeviation,
+                                                    x.data)) tempSparse.content
+        extendedTree.createTreeOfSparseMatrix algStruct (SparseMatrix(this.lineSize * snd.lineSize, this.colSize * snd.colSize, cells))
 
 
     member this.toBoolTree =
