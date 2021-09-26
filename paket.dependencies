@@ -1,4 +1,3 @@
-version 5.257.0
 source https://www.nuget.org/api/v2
 source https://api.nuget.org/v3/index.json
 storage: none
@@ -10,6 +9,7 @@ nuget Microsoft.NET.Test.Sdk 15.7.2
 nuget altcover ~> 6
 nuget Packaging.Targets 0.1.155
 
+nuget FsCheck
 nuget Expecto.FsCheck
 // [ FAKE GROUP ]
 group Build
