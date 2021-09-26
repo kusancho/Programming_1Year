@@ -78,7 +78,7 @@ let testTree =
     testList "Trees functions" [
 
         testProperty "autoTests toTree/ofTree" <| fun (x: int) ->
-            let size = (abs x) % 50 + 2
+            let size = (abs x) % 20 + 2
             let sparse = randomIntSparseMatrix (size + 10) size
             let tree = extendedTree.createTreeOfSparseMatrix monoid sparse
             let arr = genArrayBySparseMatrix sparse
@@ -86,8 +86,8 @@ let testTree =
 
 
         testProperty "autoTests tensorMultiply" <| fun (x1: int) (x2: int)  ->
-            let fst = getPowOfTwo <| abs(x1 % 20) + 5
-            let snd = getPowOfTwo <| abs(x2 % 30) + 5
+            let fst = getPowOfTwo <| abs(x1 % 3) + 5
+            let snd = getPowOfTwo <| abs(x2 % 2) + 5
             let mtx1 = randomIntSparseMatrix (fst) (fst)
             let mtx2 = randomIntSparseMatrix snd  snd
             Expect.equal
@@ -98,7 +98,7 @@ let testTree =
 
 
         testProperty "autoTests sum" <| fun (x: int) ->
-            let size = (abs x) % 50 + 2
+            let size = (abs x) % 10 + 2
             let fSparse, sSparse = (randomIntSparseMatrix size size), (randomIntSparseMatrix size size)
             let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
             let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
@@ -108,8 +108,8 @@ let testTree =
 
 
         testProperty "autoTests multiply" <| fun (x: int) (y: int) ->
-            let size1 = (abs x) % 50 + 2
-            let size2 = (abs y) % 20 + 2
+            let size1 = (abs x) % 10 + 2
+            let size2 = (abs y) % 15 + 2
             let fSparse, sSparse = (randomIntSparseMatrix size1 size2), (randomIntSparseMatrix size2 size1)
             let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
             let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
