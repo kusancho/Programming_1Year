@@ -118,6 +118,17 @@ let testTree =
             Expect.equal (genArrayBySparseMatrix sparseMult) multArr
 
 
+        testProperty "autoTests multiplyParallel" <| fun (x: int) (y: int) (depth: int) ->
+            let size1 = (abs x) % 10 + 2
+            let size2 = (abs y) % 15 + 2
+            let fSparse, sSparse = (randomIntSparseMatrix size1 size2), (randomIntSparseMatrix size2 size1)
+            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
+            let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
+            let multArr = matrixMultiply fArr sArr
+            let sparseMult = (fTree.parallelMultiply sTree semiRingAlg (depth % 5)).toSparseMatrix
+            Expect.equal (genArrayBySparseMatrix sparseMult) multArr
+
+
         testCase "extreme case #1" <| fun _ ->
             let mtx = SparseMatrix(1, 5, [])
             Expect.equal (extendedTree.createTreeOfSparseMatrix monoid mtx).tree None ""
@@ -155,6 +166,10 @@ let testTree =
 
         testCase "multiply" <| fun _ ->
             Expect.equal (fstMultTree.multiply sndMultTree (SemiRing(semiRing))) resMultTree ""
+
+
+        testCase "parallelMultiply" <| fun _ ->
+            Expect.equal (fstMultTree.parallelMultiply sndMultTree (SemiRing(semiRing)) 1) resMultTree ""
 
 
         testCase "tensorMultiply" <| fun _ ->

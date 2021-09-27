@@ -369,6 +369,47 @@ type extendedTree<'t when 't: equality> =
         List.fold (fun (acc: extendedTree<_>) x -> acc.plus x monoid) this lstOfMtx
 
 
+    member this.parallelMultiply (snd: extendedTree<'t>) (algStruct: AlgebraicStruct<'t>) depth =
+        if this.colSize <> snd.lineSize
+        then failwith "wrong sizes of trees (can't multiply)"
+        let monoid, multOp, neutral =
+            match algStruct with
+            | Monoid x -> failwith "we can't multiply in monoid"
+            | SemiRing x -> Monoid(x.Monoid), x.Mul, x.Monoid.Neutral
+        let localSum (a: quadTree<_>) b = a.plus b monoid       // sum trees in monoid
+
+        let rec go (fstTree: quadTree<'t>) (sndTree: quadTree<'t>) depth = // mult for equal tree
+            let createParallelLeaf a b c d = async { return (localSum (go a b (depth - 1)) (go c d (depth - 1))) }
+            let createLeaf a b c d = (localSum (go a b depth) (go c d depth))
+            match fstTree, sndTree with
+                | Node(a1, b1, c1, d1), Node(a2, b2, c2, d2) ->
+                        if depth = 0
+                        then
+                            let n1 = createParallelLeaf a1 a2 b1 c2
+                            let n2 = createParallelLeaf a1 b2 b1 d2
+                            let n3 = createParallelLeaf c1 a2 d1 c2
+                            let n4 = createParallelLeaf c1 b2 d1 d2
+                            let leaves = [n1; n2; n3; n4] |> Async.Parallel |> Async.RunSynchronously
+                            Node(leaves.[0], leaves.[1], leaves.[2], leaves.[3]).noneCheck neutral
+                        else
+                            Node(createLeaf a1 a2 b1 c2, createLeaf a1 b2 b1 d2,
+                                 createLeaf c1 a2 d1 c2, createLeaf  c1 b2 d1 d2).noneCheck neutral
+                | _, None -> None
+                | None, _ -> None
+                | Leaf(a), Leaf(b) -> Leaf(multOp a b).noneCheck neutral
+                | _, _ -> failwith "error in multiplication, different size"
+
+        let resSpecSize = getPowOfTwo <| max this.lineSize snd.colSize
+        if this.specSize <> snd.specSize
+        then
+             let fstLocalTree, sndLocalTree = extendedTree.alignTrees this snd algStruct
+             let result = go fstLocalTree.tree sndLocalTree.tree depth
+             extendedTree(this.lineSize, snd.colSize, result.reduce resSpecSize fstLocalTree.specSize)
+        else
+            let result = go this.tree snd.tree depth
+            extendedTree(this.lineSize, snd.colSize, result.reduce resSpecSize this.specSize)
+
+
     interface IMatrix<'t> with
         member this.colSize =
             this.colSize
