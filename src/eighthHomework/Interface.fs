@@ -1,4 +1,4 @@
-module Interfaces
+module Interface
 
 
 open AlgebraicStructure
