@@ -19,7 +19,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SparseMatrix.fs" />
     <Compile Include="AlgebraicStructure.fs" />
-    <Compile Include="Interface.fs" />
+    <Compile Include="interfaces.fs" />
     <Compile Include="QuadTree.fs" />
     <Content Include="out.dot" />
     <Content Include="input.txt" />
