@@ -2,7 +2,7 @@ module ATM
 
 
 open System.Collections.Generic
-open Interfaces
+open Interface
 open AlgebraicStructure
 open Regexp
 open AlgebraicStructsForATM
