@@ -17,8 +17,8 @@ generateMatrix <| generatorConfig
 let testTree =
     testList "mailbox" [
 
-//        testCase "with wrong config" <| fun _ ->
-//            Expect.throws (fun _ -> Worker.processFiles wrongConfig) "not enough file"
+        testCase "with wrong config" <| fun _ ->
+            Expect.throws (fun _ -> Worker.processFiles wrongConfig) "not enough file"
 
 
         testCase "with right config" <| fun _ ->

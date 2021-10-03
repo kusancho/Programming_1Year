@@ -8,6 +8,17 @@ open writePrint
 
 let loader path (balancer: MailboxProcessor<Message>) (pairAmount: TypeProcessing) =
 
+    let mtxList = Reader.getFilesName path
+
+    let input =
+        match pairAmount with
+        | All -> mtxList
+
+        | Amount pairAmount ->
+            if mtxList.Length < pairAmount * 2
+            then failwith "not enough files"
+            else mtxList.[ .. pairAmount * 2 - 1]
+
     MailboxProcessor.Start(fun inbox ->
         let rec loop input =
             async {
@@ -32,14 +43,5 @@ let loader path (balancer: MailboxProcessor<Message>) (pairAmount: TypeProcessin
 
                 | _ -> failwith "not loader's task"
             }
-
-        let mtxList = Reader.getFilesName path
-
-        match pairAmount with
-        | All -> loop mtxList
-
-        | Amount pairAmount ->
-            if mtxList.Length < pairAmount * 2
-            then failwith "not enough files"
-            loop mtxList.[ .. pairAmount * 2 - 1]
+        loop input
         )
