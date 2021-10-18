@@ -20,16 +20,6 @@ let newMatrix config path =
     readIntMatrix path
 
 
-let evaluateSparsity (mtx: int[][]) =
-    let mutable nons = 0.
-    let numOfElems = float <| mtx.Length * mtx.[0].Length
-    for i in 0 .. mtx.Length - 1 do
-        for j in 0 .. mtx.[0].Length - 1 do
-            if mtx.[i].[j] = 0
-            then nons <- nons + 1.
-    nons / numOfElems
-
-
 let argsToNormal a b c =
     abs a + 100, abs b + 100, ((abs c + 13) |> float) * 0.1 % 1.
 

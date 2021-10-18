@@ -22,12 +22,10 @@
     <None Include="App.config" />
     <Compile Include="Message.fs" />
     <Compile Include="MultiplyFunctions.fs" />
-    <Compile Include="Reader.fs" />
     <Compile Include="Loader.fs" />
     <Compile Include="Balancer.fs" />
     <Compile Include="Multiplier.fs" />
     <Compile Include="Worker.fs" />
-    <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />

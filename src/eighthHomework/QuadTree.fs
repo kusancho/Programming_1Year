@@ -410,6 +410,12 @@ type extendedTree<'t when 't: equality> =
             extendedTree(this.lineSize, snd.colSize, result.reduce resSpecSize this.specSize)
 
 
+    member this.toArray neutral =
+        let res = [| for _ in 0 .. this.lineSize - 1 -> [| for _ in 0 .. this.colSize - 1 -> neutral |] |]
+        List.iter (fun (cell: Cell<_>) -> res.[cell.line].[cell.col] <- cell.data) this.toSparseMatrix.content
+        res
+
+
     interface IMatrix<'t> with
         member this.colSize =
             this.colSize

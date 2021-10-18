@@ -6,9 +6,12 @@ open Message
 open writePrint
 
 
+let getFilesName path = System.IO.Directory.GetFiles(path) |> List.ofArray
+
+
 let loader path (balancer: MailboxProcessor<Message>) (pairAmount: TypeProcessing) =
 
-    let mtxList = Reader.getFilesName path
+    let mtxList = getFilesName path
 
     let input =
         match pairAmount with
@@ -35,7 +38,7 @@ let loader path (balancer: MailboxProcessor<Message>) (pairAmount: TypeProcessin
                         return! loop input
 
                     | fst :: snd :: tail ->
-                        (readIntMatrix fst, readIntMatrix snd) |> Tuple |> balancer.Post
+                        (readIntMatrix fst, readIntMatrix snd) |> Pair |> balancer.Post
                         inbox.Post msg
                         return! loop tail
 

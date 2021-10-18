@@ -6,9 +6,9 @@ open Generator
 open Config
 
 
-let generatorConfig = GeneratorConfig(Int, 10, 10, 0.5, 10, __SOURCE_DIRECTORY__ + "/Matrices")
-let rightConfig = Config(All, (__SOURCE_DIRECTORY__ + "/Matrices"), 2, 10, Config.makeDefaultMethodMap 0.1 0.3)
-let wrongConfig = Config(Amount 11, (__SOURCE_DIRECTORY__ + "/Matrices"), 2, 10, Config.makeDefaultMethodMap 0.1 0.3)
+let generatorConfig = GeneratorConfig(Int, 10, 10, 0.5, 10, __SOURCE_DIRECTORY__ + "/InMatrices")
+let rightConfig = Config(All, (__SOURCE_DIRECTORY__ + "/InMatrices"), (__SOURCE_DIRECTORY__ + "/OutMatrices"), 2, 10, Config.makeDefaultMethodMap 0.1)
+let wrongConfig = Config(Amount 11, (__SOURCE_DIRECTORY__ + "/InMatrices"), (__SOURCE_DIRECTORY__ + "/OutMatrices"), 2, 10, Config.makeDefaultMethodMap 0.1)
 
 generateMatrix <| generatorConfig
 
@@ -23,5 +23,10 @@ let testTree =
 
         testCase "with right config" <| fun _ ->
             Expect.equal (Worker.processFiles rightConfig) () ""
+
+
+        testCase "right amount of output files" <| fun _ ->
+            Worker.processFiles rightConfig
+            Expect.equal (System.IO.Directory.GetFiles(rightConfig.OutPath)).Length 5 "wrong amount of output files"
 
 ]
