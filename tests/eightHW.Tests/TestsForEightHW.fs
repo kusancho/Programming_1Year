@@ -63,13 +63,6 @@ let matrixMultiply (matrix1: int[,]) (matrix2: int[,]) =
     else failwith "wrong matrices"
 
 
-let time func =
-    let timer = Stopwatch()
-    timer.Start()
-    func |> ignore
-    timer.Elapsed.Seconds
-
-
 //experimental trees
 let fst = Node(Leaf(-7),  Leaf(-10),   Leaf(10),    Leaf(-10))        // TREES FOR SUM
 let snd = Node(Leaf(7),   Leaf(10),    Leaf(-10),   Leaf(10))
@@ -89,17 +82,12 @@ let testTree =
     testList "Trees functions" [
 
         testCase "comparison of seq and parallel multiply" <| fun _ ->
-            let mutable seqTime = 0
-            let mutable parallelTime = 0
             let rnd = Random()
-            for _ in 0 .. 10 do
-                let size1 = rnd.Next(100, 120)
-                let size2 = rnd.Next(100, 120)
-                let fSparse, sSparse = (randomIntSparseMatrix size1 size2), (randomIntSparseMatrix size2 size1)
-                let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
-                seqTime <- seqTime + time (fun () -> fTree.multiply sTree semiRingAlg)
-                parallelTime <- parallelTime + time (fun () -> fTree.parallelMultiply sTree semiRingAlg 2)
-            Expect.equal true (seqTime >= parallelTime) <| sprintf "seqTime: %A \n parallelTime: %A \n" seqTime parallelTime
+            let size1 = rnd.Next(100, 130)
+            let size2 = rnd.Next(100, 130)
+            let fSparse, sSparse = (randomIntSparseMatrix size1 size2), (randomIntSparseMatrix size2 size1)
+            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
+            Expect.isFasterThan (fun () -> fTree.parallelMultiply sTree semiRingAlg 2) (fun () -> fTree.multiply sTree semiRingAlg) " "
 
 
         testProperty "autoTests toTree/ofTree" <| fun (x: int) ->
