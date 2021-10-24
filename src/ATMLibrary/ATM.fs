@@ -5,16 +5,90 @@ open System.Collections.Generic
 open Interface
 open AlgebraicStructure
 open Regexp
-open AlgebraicStructsForATM
 
 
 [<Struct>]
 type NFA<'t when 't: comparison> =
     val StartState : HashSet<int>
     val FinalState : HashSet<int>
-    val Transitions : IMatrix<Set<NFASmb<'t>>>
+    val Transitions : IMatrix<Set<'t>>
     new (start, final, transitions) =
         {StartState = start; FinalState = final; Transitions = transitions}
+
+
+let epsClosure (nfa: NFA<_>) algStr algStrForBoolOp
+               (matrixBuilder: int -> int -> (int -> int -> Set<_>) -> IMatrix<_>) =
+
+    let eCls = nfa.Transitions.transitiveClosure algStr
+
+    let newFinals = HashSet()
+
+    eCls.iteri
+        (fun i j (item: Set<_>) -> if item.Contains Eps && nfa.FinalState.Contains j then newFinals.Add i |> ignore)
+
+    newFinals.UnionWith nfa.FinalState
+
+    let resTree = eCls.map (fun (set: Set<_>) -> set.Remove Eps)
+
+    let reachable = (resTree.toBool Set.empty).transitiveClosure algStrForBoolOp
+
+    let reachableFromStart = HashSet()
+
+    reachable.iteri (fun i j _ -> if nfa.StartState.Contains i then reachableFromStart.Add j |> ignore)
+
+    reachableFromStart.UnionWith nfa.StartState
+
+    let newStateToOldState = Dictionary()
+
+    reachableFromStart |> Seq.iteri (fun i x -> newStateToOldState.Add (i, x)) // (new, old)
+
+    NFA(
+        newStateToOldState |> Seq.filter (fun x -> nfa.StartState.Contains x.Value)
+        |> Seq.map (fun kvp -> kvp.Key)
+        |> HashSet
+        , newStateToOldState
+          |> Seq.filter (fun x -> newFinals.Contains x.Value)
+          |> Seq.map (fun kvp -> kvp.Key)
+          |> HashSet
+        , matrixBuilder newStateToOldState.Count newStateToOldState.Count
+            (fun i j -> resTree.get(newStateToOldState.[i], newStateToOldState.[j], algStr)))
+
+
+let intersect (fst: NFA<_>) (snd: NFA<_>) algStr algStrForBoolOp matrixBuilder =
+    let monoid =
+        match algStr with
+        | SemiRing x -> x.Monoid
+        | _ -> failwith "cannot multiply in monoid"
+
+    let func (s1: Set<_>) (s2: Set<_>) =
+        let s1Hash, s2Hash = HashSet(s1), HashSet(s2)
+        let res = HashSet<_>(s1Hash) in res.IntersectWith s2Hash
+        Set(res)
+
+    let tempRing = SemiRing(new SemiRing<_>(monoid, func))
+
+    let fstCls = epsClosure fst algStr algStrForBoolOp matrixBuilder
+
+    let sndCls = epsClosure snd algStr algStrForBoolOp matrixBuilder
+
+    let product = fstCls.Transitions.tensorMultiply sndCls.Transitions tempRing
+
+    let newStartState =
+        [ for s1 in fstCls.StartState do
+              for s2 in sndCls.StartState do
+                s1 * sndCls.Transitions.lineSize + s2
+        ]
+        |> HashSet
+
+    let newFinalStates =
+        [
+            for s1 in fstCls.FinalState do
+                for s2 in sndCls.FinalState do
+                    s1 * sndCls.Transitions.lineSize + s2
+        ]
+        |> HashSet
+
+    NFA(newStartState, newFinalStates, product)
 
 
 let toDot (this: NFA<_>) outFile =
@@ -51,13 +125,12 @@ let toDot (this: NFA<_>) outFile =
     System.IO.File.WriteAllLines(outFile, header @ content @ footer)
 
 
-let regexpToNFA (regexp: Regexp<'t>)
+let regexpToNFA (regexp: Regexp<'t>) (algStr: AlgebraicStruct<_>)
     (mtxBuilder: int -> int -> (int -> int -> HashSet<NFASmb<'t>>) -> IMatrix<HashSet<NFASmb<'t>>>) =
-
     let atm = regexpToListNFA regexp
     let mtx = mtxBuilder (atm.FinalState + 1) (atm.FinalState + 1) (fun _ _ -> HashSet())
     List.iter (fun elem -> let i, elem, j = elem
-                           mtx.get(i, j, algStrForHashSetsOp).Add elem |> ignore) atm.Transitions
+                           mtx.get(i, j, algStr).Add elem |> ignore) atm.Transitions
     NFA(HashSet([atm.StartState]), HashSet([atm.FinalState]), mtx.map Set)
 
 
@@ -68,94 +141,16 @@ let seqToNFA (input: list<_>) matrixBuilder =
     NFA(HashSet([0]), HashSet([input.Length]), tree)
 
 
-let intersect (fst: IMatrix<_>) (snd: IMatrix<_>) =
-    let monoid =
-        match algStrForSetsOp with
-        | SemiRing x -> x.Monoid
-        | _ -> failwith "cannot multiply in monoid"
+let accept (nfa: NFA<_>) (input: list<_>) algStr algStrForBoolOp matrixBuilder =
 
-    let func (s1: Set<_>) (s2: Set<_>) =
-        let s1Hash, s2Hash = HashSet(s1), HashSet(s2)
-        let res = HashSet<_>(s1Hash) in res.IntersectWith s2Hash
-        Set(res)
+    let nfaStr = seqToNFA input matrixBuilder
 
-    let tempRing = SemiRing(new SemiRing<_>(monoid, func))
+    let intersection = intersect nfa nfaStr algStr algStrForBoolOp matrixBuilder
 
-    snd.tensorMultiply fst tempRing
-
-
-let epsClosure (nfa: NFA<_>)
-               (matrixBuilder: int -> int -> (int -> int -> Set<'a>) -> IMatrix<_>) =
-
-    let eCls = nfa.Transitions.transitiveClosure algStrForSetsOp
-
-    let newFinals = HashSet()
-
-    eCls.iteri
-        (fun i j (item: Set<_>) -> if item.Contains Eps && nfa.FinalState.Contains j then newFinals.Add i |> ignore)
-
-    newFinals.UnionWith nfa.FinalState
-
-    let resTree = eCls.map (fun (set: Set<_>) -> set.Remove Eps)
-
-    let boolTree = resTree.toBool Set.empty
-
-    let reachable = boolTree.transitiveClosure algStrForBoolOp
-
-    let reachableFromStart = HashSet()
-
-    reachable.iteri (fun i j _ -> if nfa.StartState.Contains i then reachableFromStart.Add j |> ignore)
-
-    reachableFromStart.UnionWith nfa.StartState
-
-    let newStateToOldState = Dictionary()
-
-    reachableFromStart |> Seq.iteri (fun i x -> newStateToOldState.Add (i, x)) // (new, old)
-
-    let tree = matrixBuilder newStateToOldState.Count newStateToOldState.Count (fun _ _ -> Set.empty)
-
-    let newTransitions =
-        tree.mapi (fun i j _ -> resTree.get(newStateToOldState.[i], newStateToOldState.[j], algStrForSetsOp))
-
-    let res =
-        NFA(
-            newStateToOldState |> Seq.filter (fun x -> nfa.StartState.Contains x.Value)
-            |> Seq.map (fun kvp -> kvp.Key)
-            |> HashSet
-            , newStateToOldState
-              |> Seq.filter (fun x -> newFinals.Contains x.Value)
-              |> Seq.map (fun kvp -> kvp.Key)
-              |> HashSet
-            , newTransitions)
-    res
-
-
-let accept (nfa: NFA<_>) (input: list<_>) matrixBuilder =
-
-    let nfa2Tree = seqToNFA input matrixBuilder
-
-    let eCls = epsClosure nfa matrixBuilder
-
-    let intersection = intersect eCls.Transitions nfa2Tree.Transitions
-
-    let newStartState =
-        [ for s1 in nfa2Tree.StartState do
-              for s2 in eCls.StartState do
-                s1 * eCls.Transitions.lineSize + s2
-        ]
-        |> HashSet
-
-    let newFinalStates =
-        [
-            for s1 in nfa2Tree.FinalState do
-                for s2 in eCls.FinalState do
-                    s1 * eCls.Transitions.lineSize + s2
-        ]
-
-    let projected = intersection.toBool Set.empty
+    let projected = intersection.Transitions.toBool Set.empty
 
     let reachability = projected.transitiveClosure algStrForBoolOp
 
-    newFinalStates
+    List.ofSeq intersection.FinalState
     |> List.fold (
-        fun a s -> a || (Seq.fold (fun a2 s2 -> a2 || reachability.get(s2, s, algStrForBoolOp)) false newStartState) ) false
+        fun a s -> a || (Seq.fold (fun a2 s2 -> a2 || reachability.get(s2, s, algStrForBoolOp)) false intersection.StartState) ) false
