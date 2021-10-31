@@ -1,17 +1,32 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:GUI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GUI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="GUI">
-
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        Title="DowngradedNotepad">
+    
+    <Grid RowDefinitions="Auto,*,Auto,0.3*">
+        <Menu Grid.Row ="0" Grid.Column="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" Click="Open"/>
+                <MenuItem Header="_New" Click="New"/>
+                <MenuItem Header="_Save" Click="Save"/>
+            </MenuItem>
+            <Button Name = "Run" Content = "Run" Click="Run"/>
+        </Menu>
+        <Grid Grid.Row="1">
+            <TextBox Name="CodeBox"
+                     AcceptsReturn="True"
+                     BorderThickness="0"
+                     IsReadOnly="False"/>
+        </Grid>
+        <GridSplitter Grid.Row="2" ResizeDirection="Rows"/>
+        <Grid Grid.Row="3">
+            <TextBox Name="ConsoleBox"
+                     IsReadOnly="True"/>
+        </Grid>
+    </Grid>
 
 </Window>
