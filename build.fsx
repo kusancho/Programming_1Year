@@ -41,8 +41,8 @@ let environVarAsBoolOrDefault varName defaultValue =
 // Metadata and Configuration
 //-----------------------------------------------------------------------------
 
-let productName = "Semester"
-let sln = "Semester.sln"
+let productName = "homework"
+let sln = "homework.sln"
 
 let src = __SOURCE_DIRECTORY__  @@ "src"
 
@@ -72,8 +72,8 @@ let distGlob =
 let coverageThresholdPercent = 1
 let coverageReportDir =  __SOURCE_DIRECTORY__  @@ "docs" @@ "coverage"
 
-let gitOwner = "AndreiZaycev"
-let gitRepoName = "Semester"
+let gitOwner = "alexander-kurdakov"
+let gitRepoName = "Programming_Course_SPbU"
 
 let gitHubRepoUrl = sprintf "https://github.com/%s/%s" gitOwner gitRepoName
 
