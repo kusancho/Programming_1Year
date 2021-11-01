@@ -40,14 +40,12 @@ namespace GUI.Views
             _openedFile = path[0];
         }
 
-        private async void New(object sender, RoutedEventArgs e)
+        private void New(object sender, RoutedEventArgs e)
         {
             Save(sender, e);
             _codeBox.Text = "";
-            var saveFileDialog = new SaveFileDialog { InitialFileName = _openedFile };
-            var path = await saveFileDialog.ShowAsync(this);
-            if (path != null)
-                await File.WriteAllTextAsync(path, _codeBox.Text);
+            _openedFile = "";
+            Save(sender, e);
         }
 
         private async void Save(object sender, RoutedEventArgs e)
