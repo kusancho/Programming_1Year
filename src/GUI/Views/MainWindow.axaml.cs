@@ -15,7 +15,7 @@ namespace GUI.Views
         private readonly TextBox _codeBox;
         private readonly TextBox _consoleBox;
         private readonly Button _runButton;
-        private string _openedFile;
+        private string? _openedFile;
 
         public MainWindow()
         {
@@ -36,17 +36,18 @@ namespace GUI.Views
             openedFileDialog.Filters.Add(new FileDialogFilter { Extensions = { "txt" } });
             var path = await openedFileDialog.ShowAsync(this);
             if (path is not { Length: > 0 }) return;
-            _codeBox.Text = File.ReadAllText(path[0]);
+            _codeBox.Text = await File.ReadAllTextAsync(path[0]);
             _openedFile = path[0];
         }
 
         private async void New(object sender, RoutedEventArgs e)
         {
             Save(sender, e);
+            _codeBox.Text = "";
             var saveFileDialog = new SaveFileDialog { InitialFileName = _openedFile };
             var path = await saveFileDialog.ShowAsync(this);
             if (path != null)
-                File.WriteAllText(path, _codeBox.Text);
+                await File.WriteAllTextAsync(path, _codeBox.Text);
         }
 
         private async void Save(object sender, RoutedEventArgs e)
@@ -54,42 +55,30 @@ namespace GUI.Views
             var saveFileDialog = new SaveFileDialog { InitialFileName = _openedFile };
             var path = await saveFileDialog.ShowAsync(this);
             if (path != null)
-                File.WriteAllText(path, _codeBox.Text);
+                await File.WriteAllTextAsync(path, _codeBox.Text);
         }
 
-        private async void Run(object sender, RoutedEventArgs e)
+        private void Run(object sender, RoutedEventArgs e)
         {
             _runButton.IsEnabled = false;
+            _consoleBox.Text = "Execution started:\n";
             var code = _codeBox.Text;
-            _consoleBox.Text = "Interpretation is started! Please wait for finish...\n";
-            var task = new Task<string>(() =>
-                {
-                    var d = Interpreter.runPrint(Interpreter.parse(code));
-                    return d;
-                }
-            );
-            task.ContinueWith(x =>
+            var task = new Task<string>(() => Interpreter.runPrint(Interpreter.parse(code)));
+            task.ContinueWith(t =>
                 Dispatcher.UIThread.Post(() =>
                 {
-                    try { _consoleBox.Text += x.Result + "Interpretation is finished!\n"; }
-                    catch (Exception ex) { _consoleBox.Text = ex.Message; }
-                    _runButton.IsEnabled = true;
+                    try
+                    {
+                        _consoleBox.Text += t.Result + "\n";
+                        _runButton.IsEnabled = true;
+                    }
+                    catch (Exception exception)
+                    {
+                        _consoleBox.Text += exception.Message + "\n";
+                        _runButton.IsEnabled = true;
+                    }
                 }));
             task.Start();
-        
-            _codeBox.Text = "";
-            if (_codeBox.Text.Trim() == "") return;
-            
-            try
-            {
-                Run(sender, e);
-            }
-            catch (Exception ex)
-            {
-                _consoleBox.Text = ex.Message;
-                _runButton.IsEnabled = true;
-            }
-            
         }
     }
 }
