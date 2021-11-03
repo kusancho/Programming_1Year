@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using GUI.ViewModels;
 using GUI.Views;
 
 namespace GUI
@@ -12,6 +11,9 @@ namespace GUI
         {
             AvaloniaXamlLoader.Load(this);
         }
+        
+        // resposible for closing gui
+        private class MainWindowViewModel { }
 
         public override void OnFrameworkInitializationCompleted()
         {

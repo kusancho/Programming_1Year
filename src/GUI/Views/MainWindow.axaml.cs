@@ -69,9 +69,12 @@ namespace GUI.Views
                     {
                         _consoleBox.Text += t.Result + "\n";
                         _runButton.IsEnabled = true;
+                        _consoleBox.Text += "Execution finished." + "\n";
+                        
                     }
                     catch (Exception exception)
                     {
+                         _consoleBox.Text += "Execution failed:" + "\n";
                         _consoleBox.Text += exception.Message + "\n";
                         _runButton.IsEnabled = true;
                     }
