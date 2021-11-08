@@ -20,6 +20,7 @@ namespace GUI.Views
         public MainWindow()
         {
             InitializeComponent();
+            Interpreter.printed.Subscribe(PrintToConsole);
             _consoleBox = this.Find<TextBox>("ConsoleBox");
             _codeBox = this.Find<TextBox>("CodeBox");
             _runButton = this.Find<Button>("Run");
@@ -57,29 +58,37 @@ namespace GUI.Views
                 await File.WriteAllTextAsync(path, _codeBox.Text);
         }
 
+        private void PrintToConsole(string str)
+        {
+            Dispatcher.UIThread.Post(() => _consoleBox.Text += str + '\n');
+        }
+
         private void Run(object sender, RoutedEventArgs e)
         {
             _runButton.IsEnabled = false;
             _consoleBox.Text = "Execution started:\n";
             var code = _codeBox.Text;
-            var task = new Task<string>(() => Interpreter.runPrint(Interpreter.parse(code)));
-            task.ContinueWith(t =>
-                Dispatcher.UIThread.Post(() =>
+            var task = new Task(() =>
+            {
+                try
                 {
-                    try
+                    Interpreter.runPrint(Lexer.parse(code));
+                    Dispatcher.UIThread.Post(() =>
                     {
-                        _consoleBox.Text += t.Result + "\n";
                         _runButton.IsEnabled = true;
                         _consoleBox.Text += "Execution finished." + "\n";
-                        
-                    }
-                    catch (Exception exception)
+                    });
+                }
+                catch (Exception exception)
+                {
+                    Dispatcher.UIThread.Post(() =>
                     {
                          _consoleBox.Text += "Execution failed:" + "\n";
-                        _consoleBox.Text += exception.Message + "\n";
-                        _runButton.IsEnabled = true;
-                    }
-                }));
+                         _consoleBox.Text += exception.Message + "\n";
+                         _runButton.IsEnabled = true;
+                    });
+                }
+            });
             task.Start();
         }
     }

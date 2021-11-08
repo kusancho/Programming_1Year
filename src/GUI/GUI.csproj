@@ -9,7 +9,7 @@
     <None Remove=".gitignore" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Arithm" Version="1.0.9" />
+    <PackageReference Include="Arithm" Version="1.1.0" />
     <PackageReference Include="Avalonia" Version="0.10.10" />
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="0.10.9" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.10" />
