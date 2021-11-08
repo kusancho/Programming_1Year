@@ -32,6 +32,7 @@ namespace GUI.Views
         
         private async void Open(object sender, RoutedEventArgs e)
         {
+            Save(sender, e);
             var openedFileDialog = new OpenFileDialog();
             openedFileDialog.Filters.Add(new FileDialogFilter { Extensions = { "txt" } });
             var path = await openedFileDialog.ShowAsync(this);
