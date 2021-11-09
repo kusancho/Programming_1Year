@@ -10,9 +10,9 @@
     <Grid RowDefinitions="Auto,*,Auto,0.3*" Name="Grid">
         <Menu Grid.Row ="0" Grid.Column="0">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" Click="OpenEvent"/>
-                <MenuItem Header="_New" Click="NewEvent"/>
-                <MenuItem Header="_Save" Click="SaveEvent"/>
+                <MenuItem Header="_Open" InputGesture="Ctrl + O" Click="OpenEvent"/>
+                <MenuItem Header="_New" InputGesture="Ctrl + N" Click="NewEvent"/>
+                <MenuItem Header="_Save" InputGesture="Ctrl + S" Click="SaveEvent"/>
                 <MenuItem Header="_Save to" Click="SaveToEvent"/>
             </MenuItem>
             <Button Name = "Run" Content = "Run" Click="Run"/>
