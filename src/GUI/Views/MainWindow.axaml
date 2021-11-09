@@ -7,12 +7,13 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="DowngradedNotepad">
     
-    <Grid RowDefinitions="Auto,*,Auto,0.3*">
+    <Grid RowDefinitions="Auto,*,Auto,0.3*" Name="Grid">
         <Menu Grid.Row ="0" Grid.Column="0">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" Click="Open"/>
-                <MenuItem Header="_New" Click="New"/>
-                <MenuItem Header="_Save" Click="Save"/>
+                <MenuItem Header="_Open" Click="OpenEvent"/>
+                <MenuItem Header="_New" Click="NewEvent"/>
+                <MenuItem Header="_Save" Click="SaveEvent"/>
+                <MenuItem Header="_Save to" Click="SaveToEvent"/>
             </MenuItem>
             <Button Name = "Run" Content = "Run" Click="Run"/>
         </Menu>

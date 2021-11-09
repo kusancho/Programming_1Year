@@ -4,18 +4,21 @@ using Avalonia.Markup.Xaml;
 using System.IO;
 using System.Threading.Tasks;
 using Arithm;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 
 
 namespace GUI.Views
 {
-    public partial class MainWindow : Window
+    public class MainWindow : Window
     {
         private readonly TextBox _codeBox;
         private readonly TextBox _consoleBox;
         private readonly Button _runButton;
         private string? _openedFile;
+        private readonly Grid _grid;
+        private bool _ctrlIsPressed;
 
         public MainWindow()
         {
@@ -24,6 +27,33 @@ namespace GUI.Views
             _consoleBox = this.Find<TextBox>("ConsoleBox");
             _codeBox = this.Find<TextBox>("CodeBox");
             _runButton = this.Find<Button>("Run");
+            _grid = this.FindControl<Grid>("Grid");
+            _grid.KeyDown += SaveKeyBoardEvent;
+            _grid.KeyUp += LetterPress;
+        }
+
+        private void SaveKeyBoardEvent(object? sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.LeftCtrl) return;
+            _ctrlIsPressed = true;
+        }
+        
+        void LetterPress(object? sender, KeyEventArgs e)
+        {
+            if (!_ctrlIsPressed) return;
+            switch (e.Key)
+            {
+                case Key.S:
+                    Save();
+                    break;
+                case Key.O:
+                    Open();
+                    break;
+                case Key.N:
+                    New();
+                    break;
+            }
+            _ctrlIsPressed = false;
         }
 
         private void InitializeComponent()
@@ -31,9 +61,14 @@ namespace GUI.Views
             AvaloniaXamlLoader.Load(this);
         }
         
-        private async void Open(object sender, RoutedEventArgs e)
+        private void OpenEvent(object sender, RoutedEventArgs e)
         {
-            Save(sender, e);
+            Open();
+        }
+        
+        private async void Open()
+        {
+            Save();
             var openedFileDialog = new OpenFileDialog();
             openedFileDialog.Filters.Add(new FileDialogFilter { Extensions = { "txt" } });
             var path = await openedFileDialog.ShowAsync(this);
@@ -42,20 +77,57 @@ namespace GUI.Views
             _openedFile = path[0];
         }
 
-        private void New(object sender, RoutedEventArgs e)
+        private void NewEvent(object sender, RoutedEventArgs e)
         {
-            Save(sender, e);
-            _codeBox.Text = "";
-            _openedFile = "";
-            Save(sender, e);
+            New();
+        }
+        
+        private void New()
+        {
+            if (String.IsNullOrEmpty(_codeBox.Text) && String.IsNullOrEmpty(_openedFile))
+            {
+                Save();
+            }
+            else
+            {
+                SaveTo();
+                _codeBox.Text = "";
+                _openedFile = "";
+                SaveTo();
+            }
         }
 
-        private async void Save(object sender, RoutedEventArgs e)
+        private void SaveToEvent(object sender, RoutedEventArgs e)
+        {
+            SaveTo();
+        }
+        
+        private async void SaveTo()
         {
             var saveFileDialog = new SaveFileDialog { InitialFileName = _openedFile };
             var path = await saveFileDialog.ShowAsync(this);
             if (path != null)
+            {
+                _openedFile = path;
                 await File.WriteAllTextAsync(path, _codeBox.Text);
+            }
+        }
+        
+        private void SaveEvent(object sender, RoutedEventArgs e)
+        {
+            Save();
+        }
+        
+        private async void Save()
+        {
+            if (!string.IsNullOrEmpty(_openedFile))
+            {
+                await File.WriteAllTextAsync(_openedFile, _codeBox.Text);
+            }
+            else
+            {
+                SaveTo();
+            }
         }
 
         private void PrintToConsole(string str)
@@ -91,5 +163,7 @@ namespace GUI.Views
             });
             task.Start();
         }
+
+        
     }
 }
