@@ -411,14 +411,18 @@ type extendedTree<'t when 't: equality> =
 
 
     /// size of matrix 4^(ceil log_4 size)
-    static member createSquareIntQT size =
+    /// sparsity shows zero percentage of all elements
+    static member createSquareIntQT size sparsity =
         let rnd = System.Random()
         let rec genRandomIntTree (depth: int) =
             if depth = 0
-            then Leaf <| rnd.Next()
+            then
+                if rnd.NextDouble() > sparsity
+                then Leaf <| rnd.Next()
+                else None
             else
                 Node(genRandomIntTree (depth - 1), genRandomIntTree (depth - 1),
-                     genRandomIntTree (depth - 1), genRandomIntTree (depth - 1))
+                     genRandomIntTree (depth - 1), genRandomIntTree (depth - 1)).noneCheck 0
 
         extendedTree(size, size, genRandomIntTree <| int (System.Math.Ceiling(System.Math.Log(float size, float 4))))
 

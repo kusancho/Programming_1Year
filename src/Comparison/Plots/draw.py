@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pandas as pd
 
-
+plotName = "SeqVsParallel0,8"
 labels = []
 def add_label(violin, label):
     color = violin["bodies"][0].get_facecolor().flatten()
@@ -26,11 +26,11 @@ def draw(file, name, axs):
 
 
 def drawFiles (filesWithLegend, out):	
-	fig = plt.figure()
+	fig = plt.figure(plotName)
 	axs = plt.axes()
 
 	axs.yaxis.grid(True)
-	axs.set_xlabel('Размер матриц * 1000')
+	axs.set_xlabel('Длина стороны матрицы * 1000')
 	axs.set_ylabel('Время умножения (миллисекунды) * 10')
 
 	for (file,legend) in filesWithLegend:
@@ -41,6 +41,6 @@ def drawFiles (filesWithLegend, out):
 	plt.savefig(out)
 	plt.close(fig)
 
-drawFiles([('parallel.csv', "parallel"), ('seq.csv', "seq")], 
-	"parallelVsSeq.pdf")
+drawFiles([('parallel0,8.csv', "parallel"), ('seq0,8.csv', "seq")], 
+	plotName + ".pdf")
 	

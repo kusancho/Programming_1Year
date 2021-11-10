@@ -9,12 +9,12 @@ let time f =
     time
 
 
-let createCSV seqPath parallelPath sMult pMult _from _to _step cycles =
+let createCSV seqPath parallelPath sMult pMult _from _to _step cycles sparsity =
     let sizes = [for j in _from .. _step .. _to -> j]
     let fstTime, sndTime = Array.zeroCreate sizes.Length, Array.zeroCreate sizes.Length
     let mutable j = 0
     for size in sizes do
-        let tree = QuadTree.extendedTree<int>.createSquareIntQT size
+        let tree = QuadTree.extendedTree<int>.createSquareIntQT size sparsity
         let fstTimes, sndTimes = Array.zeroCreate cycles, Array.zeroCreate cycles
         for j in 0 .. cycles - 1 do
             fstTimes.[j] <- string <| time (fun _ -> sMult tree tree)
