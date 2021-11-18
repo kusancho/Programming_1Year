@@ -383,17 +383,17 @@ type extendedTree<'t when 't: equality> =
             let createLeaf a b c d = (localSum (go a b depth) (go c d depth))
             match fstTree, sndTree with
                 | Node(a1, b1, c1, d1), Node(a2, b2, c2, d2) ->
-                        if depth = 0
-                        then
-                            let n1 = createParallelLeaf a1 a2 b1 c2
-                            let n2 = createParallelLeaf a1 b2 b1 d2
-                            let n3 = createParallelLeaf c1 a2 d1 c2
-                            let n4 = createParallelLeaf c1 b2 d1 d2
-                            let leaves = [n1; n2; n3; n4] |> Async.Parallel |> Async.RunSynchronously
-                            Node(leaves.[0], leaves.[1], leaves.[2], leaves.[3]).noneCheck neutral
-                        else
-                            Node(createLeaf a1 a2 b1 c2, createLeaf a1 b2 b1 d2,
-                                 createLeaf c1 a2 d1 c2, createLeaf  c1 b2 d1 d2).noneCheck neutral
+                    if depth > 0
+                    then
+                        let n1 = createParallelLeaf a1 a2 b1 c2
+                        let n2 = createParallelLeaf a1 b2 b1 d2
+                        let n3 = createParallelLeaf c1 a2 d1 c2
+                        let n4 = createParallelLeaf c1 b2 d1 d2
+                        let leaves = [n1; n2; n3; n4] |> Async.Parallel |> Async.RunSynchronously
+                        Node(leaves.[0], leaves.[1], leaves.[2], leaves.[3]).noneCheck neutral
+                    else
+                        Node(createLeaf a1 a2 b1 c2, createLeaf a1 b2 b1 d2,
+                             createLeaf c1 a2 d1 c2, createLeaf  c1 b2 d1 d2).noneCheck neutral
                 | _, None -> None
                 | None, _ -> None
                 | Leaf(a), Leaf(b) -> Leaf(multOp a b).noneCheck neutral
@@ -414,6 +414,23 @@ type extendedTree<'t when 't: equality> =
         let res = [| for _ in 0 .. this.lineSize - 1 -> [| for _ in 0 .. this.colSize - 1 -> neutral |] |]
         List.iter (fun (cell: Cell<_>) -> res.[cell.line].[cell.col] <- cell.data) this.toSparseMatrix.content
         res
+        
+        
+    /// size of matrix 4^(ceil log_4 size)
+    /// sparsity shows zero percentage of all elements
+    static member createSquareIntQT size sparsity =
+        let rnd = System.Random()
+        let rec genRandomIntTree (depth: int) =
+            if depth = 0
+            then
+                if rnd.NextDouble() > sparsity
+                then Leaf <| rnd.Next()
+                else None
+            else
+                Node(genRandomIntTree (depth - 1), genRandomIntTree (depth - 1),
+                     genRandomIntTree (depth - 1), genRandomIntTree (depth - 1)).noneCheck 0
+
+        extendedTree(size, size, genRandomIntTree <| int (System.Math.Ceiling(System.Math.Log(float size, float 4))))
 
 
     interface IMatrix<'t> with

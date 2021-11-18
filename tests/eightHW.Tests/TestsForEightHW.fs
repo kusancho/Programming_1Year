@@ -1,5 +1,9 @@
 module TestsForEighthHW
 
+open System
+open System.Diagnostics
+open System.Reflection
+open System.Threading
 open Expecto
 open QuadTree
 open AlgebraicStructure
@@ -76,6 +80,15 @@ let resMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 
 [<Tests>]
 let testTree =
     testList "Trees functions" [
+
+        testCase "comparison of seq and parallel multiply" <| fun _ ->
+            let rnd = Random()
+            let size1 = rnd.Next(100, 130)
+            let size2 = rnd.Next(100, 130)
+            let fSparse, sSparse = (randomIntSparseMatrix size1 size2), (randomIntSparseMatrix size2 size1)
+            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
+            Expect.isFasterThan (fun () -> fTree.parallelMultiply sTree semiRingAlg 2) (fun () -> fTree.multiply sTree semiRingAlg) " "
+
 
         testProperty "autoTests toTree/ofTree" <| fun (x: int) ->
             let size = (abs x) % 20 + 2
