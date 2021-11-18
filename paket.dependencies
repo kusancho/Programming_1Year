@@ -1,15 +1,15 @@
+version 5.257.0
 source https://www.nuget.org/api/v2
 source https://api.nuget.org/v3/index.json
 storage: none
 nuget Argu 6.0
-nuget FSharp.Core 4.3.4
+nuget FSharp.Core 5.0.0
 nuget Expecto 8.13.1
 nuget YoloDev.Expecto.TestSdk 0.8.0
 nuget Microsoft.NET.Test.Sdk 15.7.2
 nuget altcover ~> 6
 nuget Packaging.Targets 0.1.155
 
-nuget FsCheck
 nuget Expecto.FsCheck
 // [ FAKE GROUP ]
 group Build
