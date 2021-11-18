@@ -1,5 +1,9 @@
 module TestsForEighthHW
 
+open System
+open System.Diagnostics
+open System.Reflection
+open System.Threading
 open Expecto
 open QuadTree
 open AlgebraicStructure
@@ -77,6 +81,15 @@ let resMultTree = extendedTree.createTreeOfSparseMatrix monoid (SparseMatrix(1, 
 let testTree =
     testList "Trees functions" [
 
+        testCase "comparison of seq and parallel multiply" <| fun _ ->
+            let rnd = Random()
+            let size1 = rnd.Next(100, 130)
+            let size2 = rnd.Next(100, 130)
+            let fSparse, sSparse = (randomIntSparseMatrix size1 size2), (randomIntSparseMatrix size2 size1)
+            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
+            Expect.isFasterThan (fun () -> fTree.parallelMultiply sTree semiRingAlg 2) (fun () -> fTree.multiply sTree semiRingAlg) " "
+
+
         testProperty "autoTests toTree/ofTree" <| fun (x: int) ->
             let size = (abs x) % 20 + 2
             let sparse = randomIntSparseMatrix (size + 10) size
@@ -118,6 +131,17 @@ let testTree =
             Expect.equal (genArrayBySparseMatrix sparseMult) multArr
 
 
+        testProperty "autoTests multiplyParallel" <| fun (x: int) (y: int) (depth: int) ->
+            let size1 = (abs x) % 10 + 2
+            let size2 = (abs y) % 15 + 2
+            let fSparse, sSparse = (randomIntSparseMatrix size1 size2), (randomIntSparseMatrix size2 size1)
+            let fTree, sTree = (extendedTree.createTreeOfSparseMatrix monoid fSparse), (extendedTree.createTreeOfSparseMatrix monoid sSparse)
+            let fArr, sArr = (genArrayBySparseMatrix fSparse), (genArrayBySparseMatrix sSparse)
+            let multArr = matrixMultiply fArr sArr
+            let sparseMult = (fTree.parallelMultiply sTree semiRingAlg (depth % 5)).toSparseMatrix
+            Expect.equal (genArrayBySparseMatrix sparseMult) multArr
+
+
         testCase "extreme case #1" <| fun _ ->
             let mtx = SparseMatrix(1, 5, [])
             Expect.equal (extendedTree.createTreeOfSparseMatrix monoid mtx).tree None ""
@@ -155,6 +179,10 @@ let testTree =
 
         testCase "multiply" <| fun _ ->
             Expect.equal (fstMultTree.multiply sndMultTree (SemiRing(semiRing))) resMultTree ""
+
+
+        testCase "parallelMultiply" <| fun _ ->
+            Expect.equal (fstMultTree.parallelMultiply sndMultTree (SemiRing(semiRing)) 1) resMultTree ""
 
 
         testCase "tensorMultiply" <| fun _ ->

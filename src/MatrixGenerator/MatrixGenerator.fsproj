@@ -5,6 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <RootNamespace>MatrixGenerator</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
     <Title>homework</Title>
@@ -16,14 +17,12 @@
     
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="writePrint.fs" />
-    <None Include="App.config" />
     <Compile Include="Generator.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />
+    <ProjectReference Include="..\eighthHomework\eighthHomework.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

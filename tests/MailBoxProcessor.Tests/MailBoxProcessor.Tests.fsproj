@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="AssemblyInfo.fs" />
+        <Compile Include="MailBoxProcessorTests.fs" />
+        <Compile Include="Main.fs" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/homework/homework.fsproj" />
+        <ProjectReference Include="..\..\src\ATMLibrary\ATMLibrary.fsproj" />
+        <ProjectReference Include="..\..\src\eighthHomework\eighthHomework.fsproj" />
+        <ProjectReference Include="..\..\src\MailBoxProcessor\MailBoxProcessor.fsproj" />
+        <ProjectReference Include="..\..\src\MatrixGenerator\MatrixGenerator.fsproj" />
+        <ProjectReference Include="..\..\src\sortProj\sortProj.fsproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Expecto.FsCheck" Version="8.13.1" />
+    </ItemGroup>
+    <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>
