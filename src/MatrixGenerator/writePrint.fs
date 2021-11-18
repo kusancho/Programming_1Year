@@ -19,3 +19,13 @@ let readIntMatrix path =
           int <| subString.[j]
       |]
     |]
+
+
+let evaluateSparsity (mtx: int[][]) =
+    let mutable nons = 0.
+    let numOfElems = float <| mtx.Length * mtx.[0].Length
+    for i in 0 .. mtx.Length - 1 do
+        for j in 0 .. mtx.[0].Length - 1 do
+            if mtx.[i].[j] = 0
+            then nons <- nons + 1.
+    nons / numOfElems
